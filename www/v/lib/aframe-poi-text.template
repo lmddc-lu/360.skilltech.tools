@@ -1,0 +1,70 @@
+<!-- POI template -->
+<a-entity
+  class="poi-open"
+  scale="20, 20, 1"
+  visible="true"
+  position="0, 0, 5"
+>
+  <!-- rounded square -->
+  <a-entity
+    poi-rounded-square="width: 1.1; height: 0.8; corner: bl, br, tl, tr;  radius: 0.04;"
+    position="0, 0, -0.1"
+    stretch="margin: 0.08; margin-top: 0.07; spacing: 0.07;"
+    center="direction: vertical; anchor: middle; margin: 0.08; margin-top: 0.07; spacing: 0.07;"
+  >
+
+    <!-- Icon -->
+    <a-entity
+      float="top: 0.05"
+      position="0, 0, 0.1"
+      geometry="primitive: plane; height: 0.25; width: 0.25"
+      material="shader: flat; src: ${icon}; transparent: true;"
+    ></a-entity>
+
+    <!-- Text Title-->
+    <a-text
+    value="${title}"
+    align="left"
+    anchor="center"
+    width="0.9"
+    color="black"
+    wrap-count="27"
+    baseline="center"
+    z-offset="0"
+    negate="false"
+    font="./font/opensans/OpenSans-Bold-msdf.json"
+    position="0, 0.25, 0.1"
+    geometry="primitive: plane; height: 0; width: 0"
+    material="shader: flat; color: pink; transparent: true; opacity: 0; alphaTest: 0.3;"
+    ></a-text>
+
+    <!-- Text -->
+    <a-text
+      value="${text}"
+      width="0.9"
+      color="black"
+      wrap-count="40"
+      baseline="center"
+      align="left"
+      anchor="center"
+      z-offset="0"
+      negate="false"
+      font="./font/opensans/OpenSans-Medium-msdf.json"
+      geometry="primitive: plane; width: 0; height: 0;"
+      material="shader: flat; color: red; transparent: true; opacity: 0; alphaTest: 0.3;"
+      position="0, -0.1, 0.1"
+    ></a-text>
+
+    <!-- Close -->
+    <a-entity
+      class="poi-btn clickable"
+      geometry="primitive: plane; width: 0.5; height: 0.1;"
+      material="shader: flat; src: ./img/btn_quit2.png; transparent: true; opacity: 1; alphaTest: 0.3;"
+      position="0, -0.5, 0.1"
+      animation__mouseenter="property:scale; to: 1.1 1.1 1; dur: 40; easing: linear; startEvents: mouseenter"
+      animation__mouseleave="property:scale; to: 1 1 1; dur: 50; easing: linear; startEvents: mouseleave"
+      data-btn="close"
+    ></a-entity>
+  </a-entity>
+</a-entity>
+<!-- End POI template -->

@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>360&deg; viewer</title>
+    <style>
+      body, html {
+        margin: 0; height: 100%; overflow: hidden;
+      }
+      body{
+        background-color: grey;
+        padding: 0;
+        margin: 0;
+        font-family: "Inter", arial, sans-serif;
+        font-weight: 300;
+        
+      }
+      iframe {
+        height: 100vh;
+        width: 100vw;
+        padding: 0;
+        margin: 0;
+        border-width: 0;
+      }
+      #buttonbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+        margin: 3vw;
+      }
+      #buttonbar button {
+        min-width: 120px;
+        min-height: 35px;
+        font-size: 1em;
+        padding: 0.5em;
+        background-color: #161616;
+        border-radius: 2px;
+        color: white;
+        outline: none;
+        appearance: none;
+        border: 0px;
+      }
+      .about{
+        border-radius: 15px;
+        position: absolute;
+        bottom: 20px;
+        left: -50%;
+        background-color: white;
+        width: 490px;
+        transition: left 0.5s;
+      }
+      .about.show {
+        left: 20px;
+      }
+      .content{
+        padding: 20px 20px 20px 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, .1);
+      }
+      .title{
+        height: 44px;
+        display: flex;
+        align-items: center;
+      }
+      img{
+        width: 40px;
+        height: 40px;
+      }
+      h2{
+        margin: 0;
+        font-size: 18px;
+        position: relative;
+        padding-left: 18px;
+        padding-right: 20px;
+      }
+      p{
+        font-size: 15px;
+        line-height: 21px;
+        margin-bottom: 0px;
+      }
+      button.close{
+        float: right;
+        height: auto;
+        border: 0px;
+        box-shadow: none;
+        appearance: none;
+        background-color: white;
+        margin-right: 10px;
+        margin-top: 5px;
+        cursor: pointer;
+      }
+      button.close span{
+        background-color: white;
+      }
+      button.close span img{
+        width: 14px;
+      }
+      button.about_btn{
+        border-radius: 12px !important;
+        width: 35px;
+        height: 35px;
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        border: 0px;
+        font-size: 17px;
+        cursor: pointer;
+        background-color: white;
+        -webkit-box-shadow: 10px 10px 24px -8px rgba(0, 0, 0, 0.1);
+        -moz-box-shadow: 10px 10px 24px -8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 6px 4px 0px rgba(0, 0, 0, 0.1);
+        color: black;
+        text-align: center;
+      }
+      ul{
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        padding-left: 0;
+        margin: 0;
+      }
+      ul li {
+        list-style: none;
+        font-size: 14px;
+        padding: 20px 20px;
+        width: 50%;
+      }
+      ul li:nth-child(1){
+        border-right: 1px solid rgba(0, 0, 0, .1);
+      }
+      ul li span{
+        font-weight: 500;
+      }
+      /* Info box on mobile devices */
+      @media (pointer:none), (pointer:coarse) {
+        .about {
+          bottom: -150%;
+          left: 0;
+          width: 100vw;
+          transition: bottom 0.5s;
+        }
+        .about.show {
+          left: 0;
+          bottom: 0;
+        }
+        .content{
+          padding: 20px 20px 20px 20px;
+          border-bottom: 1px solid rgba(0, 0, 0, .1);
+        }
+        .title{
+          height: 10vh;
+          display: flex;
+          align-items: center;
+        }
+        img{
+          width: 4vh;
+          height: 4vh;
+        }
+        h2{
+          margin: 0;
+          font-size: 2vh;
+          position: relative;
+          padding-left: 1.8vh;
+          padding-right: 2vh;
+        }
+        p{
+          font-size: 1.5vh;
+          line-height: 2.1vh;
+          margin-bottom: 0;
+        }
+        button.close{
+          width: 6vh;
+          height: 6vh;
+          margin-right: 1vh;
+          margin-top: 0.5vh;
+        }
+        button.close span img{
+          width: 1.4vh;
+        }
+        button.about_btn{
+          border-radius: 1.2vh !important;
+          width: 5vh;
+          height: 5vh;
+          position: absolute;
+          bottom: 4vh;
+          left: 4vh;
+          font-size: 3vh;
+          -webkit-box-shadow: 1vh 1vh 2.4vh -0.8vh rgba(0, 0, 0, 0.1);
+          -moz-box-shadow: 1vh 1vh 2.4vh -0.8vh rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0.6vh 0.4vh 0 rgba(0, 0, 0, 0.1);
+        }
+        ul li {
+          font-size: 1.4vh;
+          padding: 2vh 2vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function toggleFullScreen(ev) {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+          ev.target.innerHTML = "Exit";
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+          ev.target.innerHTML = "Fullscreen";
+        }
+      }
+    </script>
+    <iframe id="spot-view" src="blank.html"></iframe>
+<!--
+    <div id="buttonbar">
+      <button id="btn_fullscreen">Fullscreen</button>
+    </div>
+-->
+    <button class="about_btn" id="btn_show_about">
+      <span>i</span>
+    </button>
+    <div class="about">
+      <div class="header">
+        <button type="button" class="close" id="btn_hide_about" aria-label="Close">
+          <span aria-hidden="true"><img src="img/icon_close.svg" alt="close button"></span>
+        </button>
+      </div>
+      <div class="content">
+        <div class="title">
+          <img src="img/icon_about.svg" alt="About icon">
+          <h2></h2>
+        </div>
+        <p class="description"></p>
+      </div>
+      <div class="footer">
+        <ul>
+          <li><span>Author - </span></li>
+          <li><span>License - </span></li>
+        </ul>
+      </div>
+    </div>
+    <script type="module">
+      import { tourApp } from './lib/tour.js';
+      let iframe = document.getElementById("spot-view");
+      let result = await tourApp(iframe, "./spot.html?ready=1&fade=1#tour");
+      if (!result){
+        alert("Tour not found: please check the URL of this page");
+      }
+      if(document.fullscreenEnabled){
+        //~ document.getElementById("buttonbar").style.display = "block";
+      }
+      //~ document.getElementById("btn_fullscreen").addEventListener("click", toggleFullScreen, false);
+    </script>
+  </body>
+</html>

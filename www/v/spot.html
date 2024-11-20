@@ -1,0 +1,840 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>360&deg; viewer</title>
+    <meta name="description" content="360&deg; Image Gallery - A-Frame" />
+    <script src="./lib/aframe_1.5.0.min.js"></script>
+    <script src="./lib/aframe-template-component.min.js"></script>
+<!--
+    <script src="./lib/aframe-layout-component.min.js"></script>
+-->
+    <script src="./lib/aframe-event-set-component.min.js"></script>
+    <script src="./lib/aframe-proxy-event-component.min.js"></script>
+    <script src="./lib/aframe-pinch-component.js"></script>
+    <script src="./lib/aframe-poi-component.js"></script>
+    <script src="./lib/aframe-poi-rounded-square-component.js"></script>
+    <script src="./lib/aframe-center-component.js"></script>
+    <script src="./lib/aframe-float-component.js"></script>
+    <script src="./lib/aframe-stretch-component.js"></script>
+    <script src="./lib/aframe-world-component.js"></script>
+
+    <!-- Image link template to be reused. -->
+    <script id="link" type="text/html">
+      <a-entity
+        class="link clickable"
+        geometry="primitive: plane; height: 6; width: 6"
+        material="shader: flat; src: #portal-cursor; transparent: false; alphaTest: 0.5; side: double"
+        sound="on: click; src: #click-sound"
+        animation__mouseenter="property:scale; to: 1.2 1.2 1; dur: 40; easing: linear; startEvents: mouseenter; elasticity:10000;"
+        animation__mouseleave="property:scale; to: 1 1 1; dur: 50; easing: linear; startEvents: mouseleave"
+      ></a-entity>
+      <!--         proxy-event="event: click; to: #image-360; as: fadeout" -->
+    </script>
+
+    <script id="link-floor" type="text/html">
+      <a-entity
+            class="link clickable"
+            sound="on: click; src: #click-sound"
+            animation__mouseenter="property:scale; to: 1.2 1.2 1.2; dur: 40; easing: linear; startEvents: mouseenter;"
+            animation__mouseleave="property:scale; to: 1 1 1; dur: 50; easing: linear; startEvents: mouseleave"
+      >
+          <a-entity
+            class="clickable"
+            geometry="primitive: ring; segmentsTheta: 64; radiusInner: 16; radiusOuter: 20"
+            material="shader: flat; color: #FFF; transparent: false; side: double;  opacity: 0.9""
+            rotation="-90 0 0"
+            scale="${scale}"
+          >
+            <a-entity
+              class="clickable"
+              geometry="primitive: ring; radiusInner: 4; radiusOuter: 16"
+              material="shader: flat; color: #000; transparent: false; side: double; opacity: 0.3"
+            >
+            <a-entity
+              class="clickable"
+              geometry="primitive: circle; radius: 4;"
+              material="shader: flat; color: #FFF; transparent: false; side: double; opacity: 0.7""
+              sound="on: click; src: #click-sound"
+            >
+            </a-entity>
+          </a-entity>
+      </a-entity>
+    </script>
+
+    <script id="nolink" type="text/html">
+      <a-entity
+        class="link"
+        geometry="primitive: plane; height: 6; width: 6;  opacity: 1"
+        material="shader: flat; src: ${thumb}; transparent: true"
+      ></a-entity>
+    </script>
+
+    <script id="loading-tpl" type="text/html">
+      <a-entity
+        class="loading"
+        text="value: ${text}; width: ${width}; baseline: center; align: center; zOffset: 0.2; negate: false; font: ./font/opensans/OpenSans-Bold-msdf.json;"
+        position="0, 0, -50"
+      ></a-entity>
+    </script>
+    <script type="text/x-nunjucks-template"></script>
+  </head>
+  <body>
+    <script>
+
+
+      AFRAME.registerComponent("spots", {
+        schema: { type: "string" },
+
+        init: async function () {
+          var hotspots = { destinations: [], pois: [], boards: [] };
+          // Distance of the hotspots from the camera
+          this.distance = 4;
+          this.scene = this.el.sceneEl;
+          const hash = window.location.hash;
+          this.sky = this.scene.querySelector("#image-360");
+          this.world = this.scene.querySelector("#world");
+          this.loadingMsg = this.scene.querySelector("#loading-msg");
+          this.skyCache = this.scene.querySelector("#sky-cache");
+          this.links = this.scene.querySelector("#links");
+          this.pois = this.scene.querySelector("#pois");
+          this.poisOpen = this.scene.querySelector("#pois-open");
+          this.cursor = this.scene.querySelector("#cursor");
+          this.camera = this.scene.querySelector("#camera");
+          this.camera_rig = this.scene.querySelector("#rig")
+          camera_click = null; // cache value used to detect clicks on the scene
+          readyTimer = null;
+          this.nextSpot = null; // used as a cache for the next spot to load
+          const params = new URLSearchParams(document.location.search);
+          this.paramReady = params.get("ready"); // If set to "1", send the ready message until an ack receipt
+          //~ this.paramFade = params.get("fade"); // If set to "1", use a fade animation to switch between 360 images
+          this.paramFade = params.get("fade"); // If set to "1", use a fade animation to switch between 360 images
+
+          if (this.paramFade == "1"){
+            this.sky.addEventListener(
+              "imagechange",
+              (event) => {
+                console.debug("imgChange");
+                this.loadSpot();
+              },
+              false,
+            );
+          }
+
+          this.poisOpen.addEventListener("close", (event) => {
+            console.debug("close");
+          });
+
+          this.sky.addEventListener(
+            "materialtextureloaded",
+            (event) => {
+              this.loadingMsg.setAttribute("visible", false);
+              event.target.setAttribute("color", "#FFF");
+            },
+            false,
+          );
+
+          //~ camera.appendChild(cursor);
+          if (hash != "" && hash != "#spot" && hash != "#tour"&& hash != "#spotview" ) {
+            // We are in the editor mode
+            this.addCursor();
+            // We dont allow zoom for the editor
+            this.scene.removeAttribute("pinch");
+            this.sky.addEventListener(
+              "materialtextureloaded",
+              (event) => {
+                this.cursor.setAttribute("visible","true");
+              },
+              false,
+            );
+
+            // Show a message when no sky is selected
+            this.scene.setAttribute("xr-mode-ui", { enabled: false });
+            this.loadingMsg.setAttribute("data-text", "Drag and drop a 360°\nphoto from the left-side\nlibrary here");
+            this.loadingMsg.setAttribute("data-width", "100");
+            this.loadingMsg.setAttribute("template", "src: #loading-tpl");
+            console.debug("Editor mode");
+
+            /**
+             * When this window get focus, notify the parent
+             * This is to fix issues with mouse events over iframes
+             * by enabling mouse events for one iFrame at a time
+             */
+            window.addEventListener(
+              "mousedown",
+              () => {
+                parent.postMessage({
+                  type: "focus",
+                  target: window.location.hash,
+                });
+              },
+              false,
+            );
+            window.addEventListener(
+              "mouseup",
+              () => {
+                parent.postMessage({
+                  type: "blur",
+                  target: window.location.hash,
+                });
+              },
+              false,
+            );
+          } else {
+            // Move the cursor further
+            this.cursor.setAttribute(
+              "geometry",
+              "primitive: ring; radiusInner: 0.2; radiusOuter: 0.28"
+            );
+            this.cursor.setAttribute(
+              "position",
+              "0 0 -40"
+            );
+            if (hash == "#spot"){
+              // We are in the new-spot view
+              this.loadingMsg.setAttribute("data-text", "No image yet");
+              this.loadingMsg.setAttribute("data-width", "150");
+              this.loadingMsg.setAttribute("template", "src: #loading-tpl");
+            } else {
+              // Show a message when waiting for the sky to load
+              this.loadingMsg.setAttribute("data-text", "Loading...\nPlease wait");
+              this.loadingMsg.setAttribute("data-width", "150");
+              this.loadingMsg.setAttribute("template", "src: #loading-tpl");
+            }
+
+            if (hash != "#tour" && hash != "spotview"){
+              // The click event is sent event during a drag action. We consider it a click only
+              // if the camera don't moved between the mousedown and the mouseup event
+              this.sky.addEventListener(
+                "mousedown",
+                (event) => {
+                  camera_click = JSON.stringify(event.detail.intersection.point);
+                },
+                false,
+              );
+              
+              this.sky.addEventListener(
+                "mouseup",
+                (event) => {
+                  if (event.detail.intersection && camera_click == JSON.stringify(event.detail.intersection.point)){
+                    parent.postMessage({
+                      type: "click-sky",
+                      target: window.location.hash,
+                      value: this.getClickPosition(event)
+                    });
+                  }
+                },
+                false,
+              );
+            }
+
+            if (hash == "#spotview"){
+              //Add a event on click on the sky to add a POI
+              //~ cursor="rayOrigin: mouse; raycaster: #image-360"
+              console.debug("spotview");
+              this.camera.setAttribute('cursor', {'rayOrigin': 'mouse'});
+              this.camera.setAttribute('raycaster', {'objects': '.clickable'});
+              this.sky.classList.add("clickable");
+
+              // We remove the a-cursor from the scene
+              this.cursor.parentElement.removeChild(this.cursor);
+            }
+          }
+
+          let addGazeCursor = this.addGazeCursor;
+          this.scene.addEventListener('enter-vr', function(ev){
+            // Add the gaze cursor if in vr-mode
+            // Issue: entering a-frame fullscreen mode emits the "enter-vr" event too
+            addGazeCursor();
+          });
+
+          let removeCursor = this.removeCursor;
+          this.scene.addEventListener('exit-vr', function(ev){
+            removeCursor();
+          });
+
+          // Messages coming from the tour app
+          window.addEventListener(
+            "message",
+            async (event) => {
+              if (
+                event.origin !== window.location.origin
+              ) return;
+              switch (event.data.type) {
+                case 'spot':
+                console.debug("SPOT");
+                  // Load the image choosen in the app
+                  this.changeSpot(JSON.parse(event.data.value));
+                  this.ack(event.data.type);
+                  break;
+                case 'cursor':
+                  if (event.data.value == "on"){
+                    console.debug("cursor on");
+                    this.addCursor();
+                  } else if (event.data.value == "off"){
+                    console.debug("cursor off");
+                    this.removeCursor();
+                  } else {
+                    console.debug("cursor else");
+                    this.setCursor(JSON.parse(event.data.value));
+                  }
+                  this.ack(event.data.type);
+                  break;
+                case 'skies':
+                  // Load the image choosen in the app
+                  this.cacheSkies(JSON.parse(event.data.value));
+                  this.ack(event.data.type);
+                  break;
+                case 'pois':
+                  //*********** WIP
+                  // Shows the POI icon, hides the opened POI
+                  this.showPois(JSON.parse(event.data.value));
+                  this.ack(event.data.type);
+                  break;
+                case 'mouse':
+                  if (event.data.value == "on"){
+                    this.camera.setAttribute('cursor', {'rayOrigin': 'mouse'});
+                    this.camera.setAttribute('raycaster', {'objects': '.clickable'});
+                  } else if (event.data.value == "off"){
+                    this.camera.removeAttribute('cursor');
+                  }
+                  this.ack(event.data.type);
+                  break;
+                case 'rotate':
+                  // Rotate the camera rig
+                  //~ this.loadSpot(JSON.parse(event.data.value));
+                  this.rotateCamera(event.data.value);
+                  this.ack(event.data.type);
+                  break;
+                case 'screenshot':
+                  // Hide the hotspots, take picture, show the hotspots again
+                  links.object3D.visible = false;
+                  cursor.object3D.visible = false;
+                  let canvas = document
+                    .querySelector("a-scene")
+                    .components.screenshot.getCanvas("perspective");
+                  links.object3D.visible = true;
+                  cursor.object3D.visible = true;
+                  // Send the picture back to the app
+                  //parent.postMessage({"type": "screenshot", "target": window.location.hash, "data": canvas.toDataURL("image/jpeg", 0.5)});
+                  let rot = camera.getAttribute("rotation");
+                  //~ let rotrig = camera_rig.object3D.rotation;
+                  let rotrig = camera_rig.getAttribute("rotation");
+                  //~ console.log(rot);
+                  //~ console.log(rotrig);
+                  let totalrot = { x: rot.x, y: rot.y + rotrig.y, z: 0 };
+                  let width = event.data.size ? event.data.size[0] : 200;
+                  let height = event.data.size ? event.data.size[1] : 200;
+                  let zoom = event.data.zoom ? event.data.zoom : 1;
+                  let thumb = await resizeCanvas(canvas, width, height, zoom);
+                  parent.postMessage({
+                    type: "screenshot",
+                    uuid: event.data.uuid,
+                    target: event.data.target,
+                    //~ "rotation": rot,
+                    rotation: totalrot,
+                    //"data": thumb.toDataURL()
+                    "data": thumb.toDataURL("image/jpeg", 0.75)
+                    });
+
+                  break;
+                case 'ack':
+                  if (event.data.value == 'ready'){
+                    // the ready event has been received, we didnt need to resend it
+                    clearInterval(readyTimer);
+                  }
+                  break;
+                default:
+                  console.error ("spot.html: Unknown " + event.data.type + " message type");
+              }
+            },
+            false,
+          );
+
+          // At this point we are ready to get incoming messages
+          if (this.paramReady == "1"){
+            readyTimer = setInterval(this.sendReadyMessage, 300);
+            this.sendReadyMessage();
+          }
+        },
+
+        addCursor: function (){
+          this.cursor.setAttribute(
+            "geometry",
+            "primitive: plane; height: 1; width: 1.7",
+          );
+          this.cursor.setAttribute(
+            "material",
+            "shader: flat; src: ./img/cursor.png; transparent: true; color: white",
+          );
+          this.cursor.setAttribute(
+            "event-set__mouseleave",
+            "_event: mouseleave; color: white",
+          );
+          this.cursor.setAttribute(
+            "visible",
+            "false"
+          );
+        },
+
+        addGazeCursor: function (){
+          this.cursor.setAttribute(
+            "visible",
+            "true"
+          );
+          this.cursor.setAttribute(
+            "geometry",
+            "primitive: ring; radiusInner: 0.2; radiusOuter: 0.28"
+          );
+          this.cursor.setAttribute(
+            "position",
+            "0 0 -40"
+          );
+          this.cursor.setAttribute(
+            "event-set__mouseenter",
+            "_event: mouseenter; color: springgreen"
+          );
+          this.cursor.setAttribute(
+            "event-set__mouseleave",
+            "_event: mouseleave; color: black"
+          );
+          this.cursor.setAttribute(
+            "color",
+            "black"
+          );
+          this.cursor.setAttribute(
+            "objects",
+            ".clickable"
+          );
+          this.cursor.setAttribute(
+            "fuse",
+            "true"
+          );
+          this.cursor.setAttribute(
+            "animation__click",
+            "property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 2 2 2; dur: 150"
+          );
+          this.cursor.setAttribute(
+            "animation__fusing",
+            "property: fusing; startEvents: fusing; from: 2 2 2; to: 0.1 0.1 0.1; dur: 1500"
+          );
+        },
+
+        removeCursor: function (){
+          this.cursor.removeAttribute("geometry");
+          this.cursor.removeAttribute("material");
+          this.cursor.removeAttribute("event-set__mouseleave");
+          this.cursor.removeAttribute("visible");
+          this.cursor.setAttribute("objects", ".cursor_disabled");
+        },
+
+        ack: function (message){
+          parent.postMessage({
+            type: "ack",
+            value: message,
+            sender: window.location.hash,
+          });
+        },
+
+        /**
+         * Returns the rotation of the hotspot in radians
+         * from the x and y angles in degrees of the camera facing this hotspot
+         */
+        getRotation: function (deg_x, deg_y) {
+          return {
+            x: THREE.MathUtils.degToRad(deg_x),
+            y: THREE.MathUtils.degToRad(deg_y),
+          };
+        },
+
+        /**
+         * Compute the position of the hotspot
+         * from the x and y angles of the camera facing this hotspot
+         */
+        getPosition: function (deg_x, deg_y, distance=48){
+          let rot_y = THREE.MathUtils.degToRad(-deg_y);
+          let rot_x = THREE.MathUtils.degToRad(deg_x);
+          return {
+            x: Math.sin(rot_y) * distance * Math.cos(rot_x),
+            y: Math.sin(rot_x) * distance,
+            z: -distance * Math.cos(rot_y) * Math.cos(rot_x),
+          };
+        },
+
+        getClickPosition: function (event){
+          let y = event.detail.intersection.point.y;
+          let x = event.detail.intersection.point.x;
+          let z = event.detail.intersection.point.z;
+          // Distance between the camera and the click in 3D
+          let d = event.detail.intersection.distance;
+          // Distance between camera and the click into the XZ plane 
+          let d2 = Math.sqrt(Math.pow(x,2) + Math.pow(z,2));
+          return {
+            x: THREE.MathUtils.radToDeg(Math.asin(y/d)),
+            y: THREE.MathUtils.radToDeg(Math.acos(-z/d2) * Math.sign(x) * -1)
+          };
+        },
+
+        getCameraRotation: function () {
+          let rot = this.camera.getAttribute("rotation");
+          let rotrig = this.camera_rig.getAttribute("rotation");
+          let totalrot = { x: rot.x, y: rot.y + rotrig.y, z: 0 };
+          return totalrot;
+        },
+
+        rotateCamera: function (y) {
+          console.debug("rotateCamera");
+          if (this.paramFade == "1"){
+            this.sky.addEventListener(
+              "imagechange",
+              (event) => {
+                this.camera_rig.object3D.rotation.y =
+                  THREE.MathUtils.degToRad(y) - this.camera.object3D.rotation.y;
+              },
+              false,
+            );
+          } else {
+            this.camera_rig.object3D.rotation.y =
+              THREE.MathUtils.degToRad(y) - this.camera.object3D.rotation.y;
+          }
+          this.world.setAttribute("data-camera-x", this.getCameraRotation().x);
+          this.world.setAttribute("data-camera-y", y);
+        },
+
+        changeSpot: function (spot){
+          this.formerSpot = this.nextSpot;
+          this.nextSpot = spot;
+          if (this.paramFade == "1"){
+            // If the image didn't change, we don't need a fade animation
+            if(this.formerSpot == null || this.formerSpot.skies[0].filename != this.nextSpot.skies[0].filename){
+              this.sky.emit("fadeout");
+              this.world.emit("fadeout");
+            } else {
+              this.loadSpot()
+            }
+            
+            // The loadSpot will be called on the "changeimage" event
+            // during the fade animation
+          } else {
+            this.loadSpot()
+          }
+        },
+
+        loadSpot: function (){
+          this.spotId = this.nextSpot.id;
+          this.setSky(this.nextSpot.skies[0]);
+          this.showSpots(this.nextSpot.spots);
+          this.showPois(this.nextSpot.pois);
+          console.debug("End loadSpot");
+        },
+
+        setCursor: function (cursor){
+          this.cursor.setAttribute(
+            "material",
+            "shader: flat; src: " + cursor.src + "; transparent: true; color: white",
+          );
+        },
+
+        /**
+         * Set the 360degree image of the scene to this image name
+         */
+        setSky: function (sky) {
+          const rot=this.getCameraRotation();
+          THREE.Cache.enabled = true;
+          // Counter used to cancel former setSky
+          this.sky.setAttribute("data-counter", (Number(this.sky.dataset.counter) + 1));
+          let counter = this.sky.dataset.counter;
+          //Compute the theta values, used if the image is not of 2:1 ration
+          let thetaLength = 180;
+          if(sky.height && sky.width){
+            thetaLength = 360 * sky.height / sky.width;
+          }
+          let thetaStart = (180-thetaLength)/2;
+          this.sky.setAttribute("theta-length", thetaLength);
+          this.sky.setAttribute("theta-start", thetaStart);
+
+
+          let el = this.sky;
+          this.sky.addEventListener('materialtextureloaded', function () {
+            el.emit("fadein");
+            // This is executed once the thumbnail texture is loaded
+            world.setAttribute("data-counter", (Number(world.dataset.counter) + 1));
+            if (sky.filename.substring(0,10) != "data:image"){
+              world.setAttribute("world", { src: sky.filename });
+            }
+          }, {once: true});
+
+          if (sky.filename.substring(0,10) == "data:image"){
+            console.debug("Full image");
+            this.sky.setAttribute("src", sky.filename );
+            next_image = sky.filename;
+          } else {
+            // Even if the opacity should already be at 0 because of the fadeout,
+            // we added the line below is to fix a flickering issue
+            this.sky.setAttribute("material", "opacity: 0");
+            this.sky.setAttribute("src", "../data/image/" + sky.filename );
+          }
+
+          
+        },
+
+        /**
+         * Displays linked Spots in the scene at the good position
+         * with the related link and angles data
+         */
+        showSpots: function (spots) {
+          console.debug("showSpots");
+          // Remove all spots from the scene
+          while (this.links.firstChild) {
+            this.links.removeChild(links.lastChild);
+          }
+          let origin = this.spotId;
+          spots.forEach(spot => {
+            let el = document.createElement("a-entity");
+            this.links.appendChild(el);
+            let rot = this.getRotation(spot.x, spot.y);
+            let pos = this.getPosition(spot.x, spot.y);
+            el.setAttribute("data-src", spot.id);
+            el.object3D.rotation.y = rot.y;
+            if (spot.t == 1){
+              /* We compute the distance of the target based of the x angle
+               and a height of 1.7m */
+              let dist = 1.7 / Math.sin( THREE.MathUtils.degToRad(-spot.x));
+              // We fake the distance so that the target is visible even if far away
+              //~ dist = dist / Math.log10(dist);
+              let scale = 1.7 / dist;
+              el.setAttribute("data-scale", scale + " " + scale + " " + scale);
+            } else {
+              el.object3D.rotateX(rot.x);
+            }
+            //~ el.object3D.rotateX(rot.x);
+            el.setAttribute("position", { x: pos.x, y: pos.y, z: pos.z });
+            el.setAttribute("template", { src: "#link" });
+            if (this.nolink == true) {
+              el.setAttribute("template", { src: "#nolink" });
+            } else {
+              if (spot.t == 1){
+                el.setAttribute("template", { src: "#link-floor" });
+              } else {
+                el.setAttribute("template", { src: "#link" });
+              }
+            }
+            // On a click on the target, we ask the new spot to the parent window
+            el.addEventListener(
+              "click",
+              (event) => {
+                parent.postMessage({
+                  type: "spot",
+                  sender: window.location.hash,
+                  id: spot.id,
+                  x: spot.x,
+                  y: spot.y,
+                  origin: origin,
+                });
+              },
+              false,
+            );
+          })
+        },
+
+        /**
+         * Displays Point Of Interest in the scene at the good position
+         * with the related link and angles data
+         */
+        showPois: function (pois, nolink) {
+          console.debug("showPois");
+          //~ console.log(pois);
+          // Remove all POI from the scene
+          while (this.pois.firstChild) {
+            this.pois.removeChild(this.pois.lastChild);
+          }
+          while (this.poisOpen.firstChild) {
+            this.poisOpen.removeChild(this.poisOpen.lastChild);
+          }
+          if (pois){
+            pois.forEach((poi) => {
+              let el = document.createElement("a-entity");
+              let image;
+              if (poi.image_filename && poi.image_filename.substring(0,5) == "blob:"){
+                image = poi.image_filename;
+              } else if (poi.image_filename) {
+                image = "../data/image/" + poi.image_filename;
+              } else {
+                image = null;
+              }
+              el.setAttribute("poi", {
+                x: poi.x,
+                y: poi.y,
+                icon: poi.icon + ".png",
+                text: poi.text,
+                title: poi.title,
+                image: image,
+                imageWidth: poi.image_width,
+                imageHeight: poi.image_height,
+                template: poi.template,
+                state: poi.state,
+                id: poi.id,
+              });
+              this.pois.appendChild(el);
+            });
+          }
+          document.getElementById("targets").object3D.visible = true;
+        },
+
+        /**
+         * Preload the related skies images
+         */
+        cacheSkies: function (skies) {
+          let loader = new THREE.TextureLoader();
+          skies.forEach(sky => {
+            console.debug("Loading texture ../data/image/" + sky.filename);
+            let texture = loader.load("../data/image/" + sky.filename);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            document.querySelector('a-scene').renderer.setTexture2D(texture, 1);
+          });
+        },
+
+        getImageSize: async function (src) {
+          return new Promise((resolve) => {
+            let img = new Image();
+            img.onload = async function () {
+              let size = { width: this.width, height: this.height };
+              resolve(size);
+            };
+            img.onerror = async function () {
+              resolve(null);
+            };
+            img.src = src;
+          });
+        },
+
+        sendReadyMessage: function () {
+          console.debug("Ready message will be sent until the receipt of an ack message with a value of 'ready'");
+          parent.postMessage({
+            type: "ready",
+            value: "Listening to incoming messages",
+            sender: window.location.hash,
+          });
+        }
+      });
+    </script>
+    <a-scene
+      raycaster
+      pinch="minFov: 50; maxFov: 100; speed: 0.2; step: 5; camera: #camera; cursor: #cursor;"
+      spots="Load spots"
+      vr-mode-ui="cardboardModeEnabled: true; enabled: true"
+      xr-mode-ui="cardboardModeEnabled: true; enabled: true"
+      background="color: #888"
+    >
+      <a-assets>
+        <img
+          id="portal-cursor"
+          crossorigin="anonymous"
+          src="./img/target.png"
+        />
+        <img id="cursor-img" crossorigin="anonymous" src="./img/cursor.png" />
+        <img
+          id="font1"
+          crossorigin="anonymous"
+          src="./font/opensans/OpenSans-Bold.png"
+        />
+        <img
+          id="font2"
+          crossorigin="anonymous"
+          src="./font/opensans/OpenSans-Medium.png"
+        />
+        <audio
+          id="click-sound"
+          crossorigin="anonymous"
+          src="./snd/Computer_mouse_right_click.ogg"
+        ></audio>
+      </a-assets>
+
+      <!-- 360-degree image. -->
+      <a-sky
+        id="image-360"
+        radius="65"
+        theta-length="180"
+        theta-start="0"
+        color="#222"
+        transparent="true"
+        opacity="1"
+        animation__fadeout="property: components.material.material.opacity; from: 1; to: 0.0; dur: 300; startEvents: fadeout"
+        animation__fadein="property: components.material.material.opacity; from: 0; to: 1; dur: 200; startEvents: fadein"
+        proxy-event="event: animationcomplete__fadeout; to: #image-360; as: imagechange"
+        position="0 0 0"
+        data-counter="0"></a-sky>
+
+      <a-entity
+      <a-entity
+        world="radius: 64"
+        id="world"
+        visible="true"
+      ></a-entity>
+
+      <a-entity id="sky-cache">
+      </a-entity>
+      <a-entity id="targets">
+        <!-- Skies links -->
+        <a-entity id="links"> </a-entity>
+
+        <!-- POIs -->
+        <a-entity id="pois"> </a-entity>
+<!--
+        <a-entity id="test-poi" template="src: ./lib/poi/poi.template"></a-entity>
+-->
+      </a-entity>
+
+      <!-- POI's boxes when they are open -->
+      <a-entity
+        id="pois-open"
+        class="poi"
+      >
+      </a-entity>
+
+      <!-- boards container (used for the lobby) -->
+      <a-entity id="boards"> </a-entity>
+
+      <a-entity id="prefetch"> </a-entity>
+
+<!--
+      <a-gltf-model src="/viewer/gltf/rounded.gltf" position="1 1 -5" material="src: /gltf/texture/profil_element.jpeg" modify-materials></a-gltf-model>
+-->
+      
+<!--
+      <a-entity poi-img-horizontal="height: 3; width: 4; image: /data/image/HLaiMo45OL.jpg" position="0 0 -10" id="heart"></a-entity>
+-->
+
+      <!-- Camera + cursor. -->
+      <a-entity id="rig">
+        <a-camera look-controls="reverseMouseDrag: true" id="camera" wasd-controls="enabled:false" position="0 0 0" fov="80">
+          <!-- cursor attributes are modified by addCursor, addGazeCursor and removeCursor methods -->
+          <a-cursor
+            id="cursor"
+            animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 2 2 2; dur: 150"
+            animation__fusing="property: fusing; startEvents: fusing; from: 2 2 2; to: 0.1 0.1 0.1; dur: 1500"
+            event-set__mouseenter="_event: mouseenter; color: springgreen"
+            event-set__mouseleave="_event: mouseleave; color: black"
+            objects=".clickable"
+            scale="2 2 2"
+          ></a-cursor>
+          <a-entity
+            id="loading-msg"
+          ></a-entity>
+        </a-camera>
+      </a-entity>
+
+      <!-- Preload fonts -->
+      <a-entity
+        class="text"
+        text="value: .; width: 0.1; baseline: center; align: center; zOffset: 0.2; negate: false; font: ./font/opensans/OpenSans-Medium-msdf.json;"
+        position="0, 0, -70"
+      ></a-entity>
+      <a-entity
+        class="text"
+        text="value: .; width: 0.1; baseline: center; align: center; zOffset: 0.2; negate: false; font: ./font/opensans/OpenSans-Bold-msdf.json;"
+        position="0, 0, -70"
+      ></a-entity>
+    </a-scene>
+  </body>
+</html>

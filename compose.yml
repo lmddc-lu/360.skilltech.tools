@@ -1,0 +1,137 @@
+version: "3.2"
+
+services:
+    nginx-dev:
+        image: nginx
+        profiles: ["dev"]
+        volumes:
+         - ./www/data:/usr/share/nginx/html/data
+         - ./www/v:/usr/share/nginx/html/v
+         - ./certs:/usr/share/nginx/certs
+         - ./cache:/usr/share/nginx/cache
+         - ./vendor:/usr/share/nginx/vendor
+         - ./nginx.conf:/etc/nginx/nginx.conf
+         - ./conf.d/dev:/etc/nginx/conf.d
+        ports:
+         - "80:80"
+         - "443:443"
+        restart: unless-stopped
+        depends_on:
+            - php-dev
+        stop_grace_period: 1s
+        networks:
+         - app-network
+
+    nginx-prod:
+        image: nginx
+        profiles: ["prod"]
+        volumes:
+         - ./www/data:/usr/share/nginx/html/data
+         - ./www/v:/usr/share/nginx/html/v
+         - ./vue-app/dist:/usr/share/nginx/html/dist
+         - ./certs:/usr/share/nginx/certs
+         - ./cache:/usr/share/nginx/cache
+         - ./vendor:/usr/share/nginx/vendor
+         - ./nginx.conf:/etc/nginx/nginx.conf
+         - ./conf.d/prod:/etc/nginx/conf.d
+        ports:
+         - "80:80"
+         - "443:443"
+        restart: unless-stopped
+        depends_on:
+            - php-prod
+        networks:
+         - app-network
+
+    php-build:
+        profiles: ["dev", "prod"]
+        build: ./conf_php
+        image: skilltech-php
+
+    php-prod:
+        image: skilltech-php
+        depends_on:
+         - php-build
+        profiles: ["prod"]
+        restart: unless-stopped
+#        stdin_open: true
+#        tty: true
+        expose:
+         - 9000
+        volumes:
+         - ./www:/usr/share/nginx/html
+         - ./src:/usr/share/nginx/src
+         - ./cache:/usr/share/nginx/cache
+         - ./vendor:/usr/share/nginx/vendor
+         - ./composer.json:/usr/share/nginx/composer.json
+         - ./composer.lock:/usr/share/nginx/composer.lock
+         - ./conf_php/php.ini-production:/usr/local/etc/php/conf.d/php.ini
+        working_dir: /usr/share/nginx/php
+        networks:
+         - app-network
+
+    php-dev:
+        image: skilltech-php
+        depends_on:
+         - "php-build"
+        profiles: ["dev"]
+        restart: unless-stopped
+#        stdin_open: true
+#        tty: true
+        expose:
+         - 9000
+        volumes:
+         - ./www:/usr/share/nginx/html
+         - ./src:/usr/share/nginx/src
+         - ./cache:/usr/share/nginx/cache
+         - ./vendor:/usr/share/nginx/vendor
+         - ./composer.json:/usr/share/nginx/composer.json
+         - ./composer.lock:/usr/share/nginx/composer.lock
+         - ./conf_php/php.ini-development:/usr/local/etc/php/conf.d/php.ini
+        working_dir: /usr/share/nginx/php
+        networks:
+         - app-network
+
+
+    mariadb:
+        image: mariadb:latest
+        profiles: ["dev", "prod"]
+        restart: always
+        volumes:
+         - ./db:/var/lib/mysql
+         - ./sql_dump:/sql_dump
+        environment:
+            MARIADB_ROOT_PASSWORD: rootpassword
+            MARIADB_USER: lmddc
+            MARIADB_PASSWORD: password
+            MARIADB_DATABASE: tour
+        networks:
+         - app-network
+
+    vue-dev:
+        image: node:21-bookworm
+        profiles: ["dev"]
+        volumes:
+            - ./vue-app:/usr/src/app
+        stdin_open: true
+        tty: true
+        ports:
+            - "5173:5173"
+        working_dir: /usr/src/app
+        command: sh -c "npm install && npm run dev -- --host"
+        restart: unless-stopped
+        stop_grace_period: 1s
+        networks:
+         - app-network
+
+    vue-build:
+        image: node:21-bookworm
+        profiles: ["build", "prod"]
+        volumes:
+            - ./vue-app:/usr/src/app
+        working_dir: /usr/src/app
+        command: sh -c "npm install && npm run build"
+
+networks:
+    app-network:
+        driver: bridge

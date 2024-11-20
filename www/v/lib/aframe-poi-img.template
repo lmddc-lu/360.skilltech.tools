@@ -1,0 +1,74 @@
+<!-- POI template -->
+<a-entity
+  class="poi-open"
+  scale="20, 20, 1"
+  visible="true"
+  position="0, 0, 5"
+>
+  <!-- Image -->
+  <a-entity
+    poi-rounded-square="width: ${sx}; height: ${sy}; radius: 0.04; corner: tl, tr, bl, br; image: ${image}"
+    position="0, 0, 0.2"
+  ></a-entity>
+  <!-- Plane behind the image-->
+  <a-plane
+    width=1
+    height=${sy}
+    position="0, 0, 0"
+    material="shader: flat; color: #FFF;"
+  ></a-plane>
+  <!-- On top of the image -->
+  <a-entity position="0, ${sy_half}, 0">
+
+    <!-- Icon -->
+    <a-entity
+      position="-0.4, 0.1, 0.2"
+      geometry="primitive: plane; height: 0.15; width: 0.15"
+      material="shader: flat; src: ${icon}; transparent: true; opacity: 1"
+    ></a-entity>
+
+    <!-- Text Title-->
+    <a-text
+      value="${title}"
+      color="black"
+      wrap-count="20"
+      baseline="center"
+      align="left"
+      anchor="center"
+      z-offset="0"
+      negate="false"
+      font="./font/opensans/OpenSans-Bold-msdf.json"
+      position="0.05, 0.11, 0.1"
+      width="0.7"
+      geometry="primitive: plane; height: 0; width: 0;"
+      material="shader: flat; color: pink; transparent: true; opacity: 0; alphaTest: 0.3;"
+    ></a-text>
+
+    <!-- rounded square title-->
+    <a-entity
+      poi-rounded-square="width: 1; height: 0.2; radius: 0.04; corner: tl, tr"
+      position="0, 0.1, 0"
+    ></a-entity>
+  </a-entity>
+  <!-- On bottom of the image-->
+  <a-entity position="0, -${sy_half}, 0">
+
+    <!-- rounded square Quit-->
+    <a-entity
+      poi-rounded-square="width: 1; height: 0.2; radius: 0.04; corner: bl, br"
+      position="0, -0.1, 0"
+    ></a-entity>
+
+    <!-- Close -->
+    <a-entity
+      class="poi-btn clickable"
+      geometry="primitive: plane; width: 0.5; height: 0.1;"
+      material="shader: flat; src: ./img/btn_quit2.png; transparent: true; opacity: 1; alphaTest: 0.3;"
+      position="0, -0.1, 0.1"
+      animation__mouseenter="property:scale; to: 1.1 1.1 1; dur: 40; easing: linear; startEvents: mouseenter"
+      animation__mouseleave="property:scale; to: 1 1 1; dur: 50; easing: linear; startEvents: mouseleave"
+      data-btn="close"
+    ></a-entity>
+  </a-entity>
+</a-entity>
+<!-- End POI template -->

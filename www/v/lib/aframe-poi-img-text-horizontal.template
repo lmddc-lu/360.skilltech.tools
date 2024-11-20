@@ -1,0 +1,80 @@
+<!-- POI template -->
+<a-entity
+  class="poi-open"
+  scale="20, 20, 1"
+  visible="true"
+  position="0, 0, 5"
+>
+  <!-- Icon -->
+  <a-entity position="0, 0.05, 0">
+    <a-entity
+      position="0, ${sy}, 0.1"
+      geometry="primitive: plane; height: 0.25; width: 0.25"
+      material="shader: flat; src: ${icon}; transparent: true; opacity: 1"
+    ></a-entity>
+  </a-entity>
+
+
+  <!-- Image -->
+  <a-entity
+    poi-rounded-square="width: 1; height: ${sy}; corner: tl, tr; radius: 0.04; image: ${image}"
+    position="0, ${sy_half}, 0"
+  >
+  </a-entity>
+
+  <!-- rounded square -->
+  <a-entity
+    poi-rounded-square="width: 1; height: 0.6; corner: bl, br; radius: 0.04; anchor: top"
+    position="0, 0, 0"
+    stretch="margin: 0.08; margin-top: 0.07; spacing: 0.07;"
+    center="direction: vertical; anchor: top; margin: 0.08; margin-top: 0.07; spacing: 0.07;"
+  >
+
+    <!-- Text Title-->
+    <a-text
+      value="${title}"
+      line-height="50"
+      width="0.9"
+      color="black"
+      wrap-count="27"
+      baseline="center"
+      align="left"
+      anchor="center"
+      z-offset="0.1"
+      negate="false"
+      font="./font/opensans/OpenSans-Bold-msdf.json"
+      position="0, 0, 0"
+      geometry="primitive: plane; width: 0; height: 0;"
+      material="shader: flat; color: blue; transparent: true; opacity: 0; alphaTest: 0.3;"
+    ></a-text>
+
+    <!-- Text -->
+    <a-text
+      value="${text}"
+      width="0.9"
+      color="black"
+      wrap-count="40"
+      baseline="center"
+      align="left"
+      anchor="center"
+      z-offset="0.1"
+      negate="false"
+      font="./font/opensans/OpenSans-Medium-msdf.json"
+      geometry="primitive: plane; width:0; height: 0;"
+      material="shader: flat; color: red; transparent: true; opacity: 0; alphaTest: 0.3;"
+      position="0, 0, 0"
+    ></a-text>
+
+    <!-- Close -->
+    <a-entity
+      class="poi-btn clickable"
+      geometry="primitive: plane; width: 0.5; height: 0.1;"
+      material="shader: flat; src: ./img/btn_quit2.png; transparent: true; opacity: 1; alphaTest: 0.3;"
+      position="0, 0, 0.5"
+      animation__mouseenter="property:scale; to: 1.1 1.1 1; dur: 40; easing: linear; startEvents: mouseenter"
+      animation__mouseleave="property:scale; to: 1 1 1; dur: 50; easing: linear; startEvents: mouseleave"
+      data-btn="close"
+    ></a-entity>
+  </a-entity>
+</a-entity>
+<!-- End POI template -->

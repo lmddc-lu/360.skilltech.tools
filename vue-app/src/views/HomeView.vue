@@ -29,15 +29,17 @@ import ShareModal from '../components/ShareModal.vue';
 
 const router = useRouter()
 const route = useRoute()
-const newTour = ref({});
-const thumbInputRef = ref({})
-const selectedTour = ref({title: "noname"});
-const csrf = ref({});
-const tooltipList = ref([]);
+
 const copied = ref(null);
-const onboarding = ref(false);
+const csrf = ref({});
 const demoTourId = ref(false);
+const importedTour = ref({});
+const onboarding = ref(false);
+const newTour = ref({});
+const selectedTour = ref({title: "noname"});
 const shareTourEl = ref(null);
+const thumbInputRef = ref({})
+const tooltipList = ref([]);
 
 const rTours = computed(() => {
   if (Array.isArray(tours.value)) {
@@ -96,6 +98,7 @@ async function clipboard(filename) {
  */
 function handleShareTour(event){
   selectedTour.value = tours.value.filter((tour) => tour.id == event.currentTarget.dataset.tourId)[0];
+  console.log(selectedTour.value);
   shareTourEl.value.show();
 }
 
@@ -221,6 +224,41 @@ async function handleSetOnboarding(){
   modal.show();
 }
 
+/*
+ *
+ */
+async function importTour(){
+  const tour = ref({});
+  let formData = new FormData();
+  formData.append("password", importedTour.value.password ? importedTour.value.password : "");
+  formData.append("filename", importedTour.value.filename ? importedTour.value.filename : "");
+  formData.append("csrf", csrf.value);
+  await fetchForm("/copyTour.php", formData, tour);
+  console.debug(tour.value);
+
+  if (tour.value.id){
+    // Close the modal and redirect to the copied tour
+    let modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("importTour"));
+    setTimeout(() => {
+      modal.hide();
+      importedTour.value = {};
+        //redirect to new tour
+        router.push({ name: 'tour', params: { tourId: tour.value.id } });
+    }, "1000");
+  } else {
+    alert("Check the tour identifier and password");
+  }
+}
+
+async function updateTours(){
+  await fetchTours(tours);
+  // If a share modal is open, we update its tour
+  if (selectedTour.value.id){
+    selectedTour.value = tours.value.filter((tour) => tour.id == selectedTour.value.id)[0];
+  }
+  console.log("tours updated");
+}
+
 async function main(){
   await fetchTours(tours);
   fetchCSRF(csrf);
@@ -306,7 +344,13 @@ onUnmounted(() => {
   </nav>
   <main>
     <div class="container">
-      <a href="" class="btn big" data-bs-toggle="modal" id="btn-create-tour" data-bs-target="#createTour"><span></span>Create new tour</a>
+      <a href="" class="btn big" data-bs-toggle="modal" id="btn-create-tour" data-bs-target="#createTour">
+        <span></span>Create new tour
+      </a>
+      &nbsp;
+      <a href="" class="btn big import" data-bs-toggle="modal" id="btn-import-tour" data-bs-target="#importTour">
+        <span></span>Import tour
+      </a>
       <div class="tour_row" v-if="user.email">
         <div :class="{tour: true, demo: tour.id==demoTourId}" v-for="tour in rTours">
           <h2>{{ tour.title }}</h2>
@@ -327,7 +371,7 @@ onUnmounted(() => {
                 </router-link>
               </li>
               <li class="launch">
-                <a :class="{'dropdown-item': true, disabled: tour.nb_shs == 0}" :href="'https://360.skilltech.tools/v/' + tour.filename" target="_blank">
+                <a :class="{'dropdown-item': true}" :href="'https://360.skilltech.tools/v/' + tour.filename" target="_blank">
                   Launch tour
                 </a>
               </li>
@@ -452,7 +496,36 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <ShareModal ref="shareTourEl" :tour="selectedTour"></ShareModal>
+  <!-- Modal -->
+  <!-- Import tour -->
+  <div class="modal modal_createTour fade" id="importTour" tabindex="-1" role="dialog" aria-labelledby="createTourLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+        </div>
+        <div class="modal-body">
+          <div class="" v-show="newTour.step == 1">
+            <h5>Import Tour</h5>
+            <p><span>Paste the code</span> of the tour you want to import and, if it is protected, enter the password.</p>
+            <h6 class="modal-title" id="createTourLabel">Tour code</h6>
+            <div class="input_box">
+              <input type="text" placeholder="abCDef1234" v-model="importedTour.filename" maxlength="10" autofocus>
+            </div>
+            <h6 class="modal-title" id="createTourLabel">Password <span>Optional</span></h6>
+            <div class="input_box">
+              <input type="password" v-model="importedTour.password">
+            </div>
+            <div class="answer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" @click="importTour">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ShareModal ref="shareTourEl" :tour="selectedTour" :csrf="csrf" @change="updateTours"></ShareModal>
 
   <!-- Modal -->
   <!-- Export Tour -->

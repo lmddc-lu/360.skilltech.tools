@@ -1,5 +1,9 @@
 # 360.skilltech.tools
 
+## Read the changelog
+
+We maintain a CHANGELOG.md file at the root of the source code repository. When an update requires an action like updating the database schema or adding new entries into config.php, we will inform you in this file.
+
 ## Setup
 
 To redirect the 360.skilltech.tools domain to your computer, add this line to your hosts file:
@@ -9,7 +13,7 @@ To redirect the 360.skilltech.tools domain to your computer, add this line to yo
 127.0.0.1 360.skilltech.tools
 ```
 
-A sample config file is located at src/config.sample.php, copy it to src/config.php and adjust its content to your needs. Especially, you need to fill all the OIDC* constants to allow this app to use an autentication server. You should modify the USER_AGENT value with a unique string representing you so that when the app download an image from the web, the remote web server recognizes you.
+A sample config file is located at src/config.sample.php, copy it to src/config.php and adjust its content to your needs. Especially, you need to fill all the OIDC* constants to allow this app to use an autentication server.
 
 ## Spin containers
 
@@ -80,10 +84,11 @@ When it's done you can quit the mariadb shell with the ```exit``` command.
 
 This app needs an OIDC server to authenticate users. To configure the identity provider, copy the file /src/config.sample.php to /src/config.php with appropriate values.
 
+If you don't have yet an identity provider, you may enable the dev mode that allows you to log in without a password, creating a new account if needed. Put the DEV variable to true in /src/config.php then browse to the page /dev/login.php. Obviously, you must never activate this feature in production.
 
 ### Install PHP dependencies
 
-We use Composer to manage PHP dependencies. If you don't have it installed on your computer you can install it in a container. To do so, ppen a bash shell in the PHP dev container (it must be running):
+We use Composer to manage PHP dependencies. If you don't have it installed on your computer you can install it in a container. To do so, open a bash shell in the PHP dev container (it must be running):
 
     docker exec -ti 360skilltechtools-php-dev-1 bash
 
@@ -111,9 +116,14 @@ chown -R 33:$USER
 chmod -R ug+rw www
 ```
 
+## Demo tour
+
+When a user enters for the first time in their library the app will ask they to launch an onboarding demo. This will copy a demo tour into the user's collection.
+
+For this option to work you will need to create first a demo tour using the app then copy its ID into /src/config.php.
+
 ## Files
 
-Files at the root path https://360.skilltech.tools
 All PHP files in /www are served by the nginx server at https://360.skilltech.tools. The PHP source files are in the /src folder as not to be directly accessible by the web server.
 
 ## Branches

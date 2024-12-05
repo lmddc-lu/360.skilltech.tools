@@ -58,6 +58,8 @@ class TourRepository
     "`tour`.`start_id`, ".
     "`tour`.`thumb_id`, ".
     "`tour`.`user_id`, ".
+    "`tour`.`password`, ".
+    "`tour`.`share`, ".
     "`tour`.`creation_date`, ".
     "`tour`.`modification_date`, ".
     "COUNT(`spot_has_spot`.`id`) AS `nb_shs`, ".
@@ -165,8 +167,8 @@ class TourRepository
       // Create a new Tour
       $tour->setFilename();
       $statement = $this->pdo->prepare("INSERT INTO `tour` ".
-        "(`title`, `description`, `filename`, `author`, `license`, `start_id`, `thumb_id`, `user_id`, `creation_date`, `modification_date`) ".
-        "values (?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, DEFAULT(creation_date)), COALESCE(?, DEFAULT(modification_date)))");
+        "(`title`, `description`, `filename`, `author`, `license`, `start_id`, `thumb_id`, `user_id`, `password`, `share`, `creation_date`, `modification_date`) ".
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, DEFAULT(creation_date)), COALESCE(?, DEFAULT(modification_date)))");
       try {
         $statement->execute([
           $tour->getTitle(),
@@ -177,6 +179,8 @@ class TourRepository
           $tour->getStartID(),
           $tour->getThumbID(),
           $tour->getUserID(),
+          $tour->getPassword(),
+          $tour->getShare(),
           $tour->getCreationDate(),
           $tour->getModificationDate(),
         ]);
@@ -190,7 +194,7 @@ class TourRepository
       // Modify the Tour
       $statement = $this->pdo->prepare(
         "UPDATE `tour` ".
-        "SET `title`=?, `description`=?, `filename`=?, `author`=?, `license`=?, `start_id`=?, `thumb_id`=? ".
+        "SET `title`=?, `description`=?, `filename`=?, `author`=?, `license`=?, `start_id`=?, `thumb_id`=?, `password`=? , `share`=? ".
         "WHERE `id`=?"
       );
       try {
@@ -202,6 +206,8 @@ class TourRepository
           $tour->getLicense(),
           $tour->getStartID(),
           $tour->getThumbID(),
+          $tour->getPassword(),
+          $tour->getShare(),
           $tour->getID(),
         ]);
         return true;

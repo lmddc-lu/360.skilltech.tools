@@ -781,6 +781,12 @@ async function handleHelpButton(){
   }
 }
 
+async function updateTour(){
+  if (route.params.tourId){
+    await fetchTour(tour, route.params.tourId);
+  }
+}
+
 async function main(){
   if (route.params.tourId){
     await fetchTour(tour, route.params.tourId);
@@ -878,9 +884,24 @@ onUnmounted(() => {
       
     </ul>
     <ul class="right">
-      <li><a href="#" :class="{preview: true, disabled: spotHasSpots.length == 0}" id="link_visit" target="_blank"><img src="/src/assets/img/icon_eye.svg" alt="preview icon">Launch tour</a></li>
-      <li><a :class="{download: true, disabled: spotHasSpots.length == 0}" @click="exportTour"><img src="/src/assets/img/icon_download.svg" alt="download icon">Download</a></li>
-      <li><a href="#" :class="{share: true, disabled: spotHasSpots.length == 0}" @click="shareTourEl.show"><img src="/src/assets/img/icon_whiteLink.svg" alt="link icon">Share</a></li>
+      <li>
+        <a href="#" :class="{preview: true, disabled: spots.length == 0}" id="link_visit" target="_blank">
+          <img src="/src/assets/img/icon_eye.svg" alt="preview icon">
+          Launch tour
+        </a>
+      </li>
+      <li>
+        <a :class="{download: true, disabled: spots.length == 0}" @click="exportTour">
+          <img src="/src/assets/img/icon_download.svg" alt="download icon">
+          Download
+        </a>
+      </li>
+      <li>
+        <a href="#" :class="{share: true, disabled: spots.length == 0}" @click="shareTourEl.show">
+          <img src="/src/assets/img/icon_whiteLink.svg" alt="link icon">
+          Share
+        </a>
+      </li>
     </ul>
   </nav>
   <main v-if="tour.id">
@@ -923,7 +944,7 @@ onUnmounted(() => {
                         </router-link>
                       </li>
                       <li :class="{'pin': true, 'disabled': true}">
-                        <a :class="{'dropdown-item': true, 'disabled': (spot.linked!=true || tour.start_id == spot.id)}" @click="handleSetStartId(spot.id)">
+                        <a class="dropdown-item" @click="handleSetStartId(spot.id)">
                           <span></span>Set as starting point
                         </a>
                       </li>
@@ -1260,7 +1281,7 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <ShareModal ref="shareTourEl" :tour="tour"></ShareModal>
+  <ShareModal ref="shareTourEl" :tour="tour" :csrf="csrf" @change="updateTour"></ShareModal>
 
   <!-- Modal -->
   <!-- Export Tour -->

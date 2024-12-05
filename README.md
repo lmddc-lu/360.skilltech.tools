@@ -20,14 +20,9 @@
 
 Instructions stands in /doc/installation.md. You will find a docker-compose file to quickly setup a development or production environment.
 
-## Issues
-
-Any issue can be reported at bugs@skilltech.dev
-
 ## Licences
 
 Unless otherwise stated, source code found in this repository is distributed under the AGPL v3 licence.
 The source code of the viewer that resides in www/v is distributed under the MIT Licence (Expat)
 
 See CREDITS.md for more details about licences and contributors.
-

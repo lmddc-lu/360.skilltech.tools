@@ -14,9 +14,10 @@ if ( $user and $tourId>0 ) {
   $tour = $repo->findOneBy(array('id' => $tourId, 'user_id' => $user->getId()));
   $tour = $repo->find($tourId, $user->getId());
   if ($tour){
+    $tour_array = $tour->jsonSerialize();
+    $tour_array["password"] = $tour_array["password"] === null ? 0 : 1;
     //search for the thumbnail
     if($tour->getThumbID()){
-      $tour_array = $tour->jsonSerialize();
       $imageRepo = new ImageRepository();
       $thumb = $imageRepo->find($tour->getThumbID(), $user->getId());
       if ($thumb){
@@ -24,7 +25,7 @@ if ( $user and $tourId>0 ) {
       }
       exit(json_encode($tour_array));
     }
-    exit(json_encode($tour));
+    exit(json_encode($tour_array));
   } else {
     exit("{\"error\": \"Tour not found\"}");
   }

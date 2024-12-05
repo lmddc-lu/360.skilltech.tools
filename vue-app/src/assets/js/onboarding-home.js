@@ -15,6 +15,13 @@ export const onboardingSteps = [
     },
   },
   {
+    attachTo: {element: "#btn-import-tour"},
+    content: {
+      title: "Import a tour",
+      description:"Use this feature to duplicate a tour shared by another user into your collection."
+    },
+  },
+  {
     attachTo: {element: ".tour.demo"},
     content: {
       title: "A demo tour",

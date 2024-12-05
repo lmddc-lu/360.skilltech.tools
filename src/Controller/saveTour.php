@@ -123,6 +123,7 @@ if (isset($_FILES['file'])){
 
 //Add the thumb filename to the tour JSON
 $tour_array = $tour->jsonSerialize();
+$tour_array["password"] = $tour_array["password"] == null ? false : true;
 if (!$deleteImage && isset ($image) && $image->getFilename()){
   $tour_array["thumb_filename"] = $image->getFilename() . "." . $image->getFiletype();
 }

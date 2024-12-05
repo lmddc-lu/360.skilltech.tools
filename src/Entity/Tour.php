@@ -22,6 +22,8 @@ class Tour implements \JsonSerializable
   private ?int $startID = null;
   private ?int $thumbID = null;
   private ?int $userID = null;
+  private ?string $password = null;
+  private int $share = 0;
   private ?string $creationDate = null;
   private ?string $modificationDate = null;
 
@@ -42,6 +44,8 @@ class Tour implements \JsonSerializable
     $this->startID = $row["start_id"];
     $this->thumbID = $row["thumb_id"];
     $this->userID = $row["user_id"];
+    $this->password = $row["password"];
+    $this->share = $row["share"];
     $this->creationDate = $row["creation_date"];
     $this->modificationDate = $row["modification_date"];
   }
@@ -110,6 +114,7 @@ class Tour implements \JsonSerializable
     $this->license = $license;
     return $this;
   }
+
   public function getStartID():?int {
     return $this->startID;
   }
@@ -134,6 +139,35 @@ class Tour implements \JsonSerializable
 
   public function setUserID(int $userID):Tour {
     $this->userID = $userID;
+    return $this;
+  }
+
+  public function getPassword():?string {
+    return $this->password;
+  }
+
+  public function setPassword(?string $password):Tour {
+    if ($password === null){
+      $this->password = null;
+    } else {
+      $this->password = password_hash($password, PASSWORD_DEFAULT);
+    }
+    return $this;
+  }
+
+  public function verifyPassword(?string $password):Bool {
+    if ($this->password === null){
+      return true;
+    }
+    return password_verify($password, $this->password);
+  }
+
+  public function getShare():int {
+    return $this->share;
+  }
+
+  public function setShare(int $share):Tour {
+    $this->share = $share;
     return $this;
   }
 
@@ -177,8 +211,36 @@ class Tour implements \JsonSerializable
     $poiRepo = new POIRepository();
     $edges = $this->getSpotHasSpots();
     $spots = [];
+
+    if ($edges == []){
+      /*
+       * This block is executed if the tour does not have links between 360° images yet. We will add a exception to allow
+       * people to create a tour using just one image.
+       */
+      $spotId = null;
+      // We search for the starting point
+      $result = $spotRepo->find($this->startID);
+      if (!$result){
+        // There is no starting point set, we try to get the first spot
+        $result = $spotRepo->findBy(["tour_id" => $this->id]);
+      }
+      if ($result){
+        // We add an edge to the list that will have one unique spot
+        $newEdge = new SpotHasSpot();
+        $newEdge->setSpot1($result->getID());
+        $newEdge->setSpot2(0);
+        $newEdge->setSpot1x(0);
+        $newEdge->setSpot2x(0);
+        $newEdge->setSpot1y(0);
+        $newEdge->setSpot2y(0);
+        $newEdge->setSpot1t(0);
+        $newEdge->setSpot2t(0);
+
+        $edges[] = $newEdge;
+      }
+    }
+
     foreach ($edges as $edge){
-      //~ $expEdge = $edge->getObjectVars();
       $spot[0] = $spotRepo->find($edge->getSpot1());
       $spot[1] = $spotRepo->find($edge->getSpot2());
       $x[0] = $edge->getSpot1x();
@@ -189,6 +251,9 @@ class Tour implements \JsonSerializable
       $t[1] = $edge->getSpot2t();
       // Loop over the two spots of the edge
       for ($i=0; $i<=1; $i++){
+        if($spot[$i] === null){
+          break;
+        }
         $id = (string)$spot[$i]->getID(); // ID of the current spot
         if (!isset($spots[$id])){
           // We create an new entry for this spot, the key
@@ -217,14 +282,16 @@ class Tour implements \JsonSerializable
             $spots[$id]["pois"] = array_map($stripPOI, $pois);
           }
         }
-        // The ID of the spot on the other side of the edge
-        $spots[$id]["spots"][] = [
-          "id" => (string)$spot[($i+1)%2]->getID(),
-          "x" => $x[$i],
-          "y" => $y[$i],
-          "t" => $t[$i],
-        ];
-
+        // We do not add the related spot if it is null (no link between the spots)
+        if($spot[1] !== null){
+          $spots[$id]["spots"][] = [
+            // The ID of the spot on the other side of the edge
+            "id" => (string)$spot[($i+1)%2]->getID(),
+            "x" => $x[$i],
+            "y" => $y[$i],
+            "t" => $t[$i],
+          ];
+        }
       }
     }
     $tourArray = $this->jsonSerialize();
@@ -233,14 +300,16 @@ class Tour implements \JsonSerializable
     // Avoid leaking unnecessary data
     unset($tourArray["id"]);
     unset($tourArray["user_id"]);
+    unset($tourArray["password"]);
+    unset($tourArray["share"]);
     return json_encode($tourArray);
   }
 
   private function getNewID():string {
     $str = "";
-    $chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    $chars = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
     for($i=0; $i<10; $i++){
-        $str .= $chars[random_int(0, 61)];
+        $str .= $chars[random_int(0, 30)];
     }
     return $str;
   }
@@ -256,6 +325,8 @@ class Tour implements \JsonSerializable
     "start_id" => $this->startID,
     "thumb_id" => $this->thumbID,
     "user_id" => $this->userID,
+    "password" => $this->password,
+    "share" => $this->share,
     "creation_date" => $this->creationDate,
     "modification_date" => $this->modificationDate,
     ];

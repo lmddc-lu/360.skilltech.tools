@@ -108,6 +108,18 @@ a.btn.big:hover span {
 a.btn.big:focus {
   box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.1);
 }
+a.btn.big.import span {
+  background: url("/src/assets/img/icon_import.svg") no-repeat;
+  background-size: 17px;
+  background-position: center;
+  transition: 0.2s all ease-in-out;
+}
+a.btn.big.import:hover {
+  transition: 0.2s all ease-in-out;
+}
+a.btn.big.import:hover span {
+  background-size: 20px;
+}
 
 button {
   border-radius: 3px;
@@ -770,6 +782,32 @@ select.licence {
   margin-top: -20px;
   text-align: center;
 }
+.modal#importTour h5, .side#importTour h5 {
+  margin-bottom: 30px;
+}
+.modal#importTour h6, .side#importTour h6 {
+  text-align: left;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.modal#importTour h6 span, .side#importTour h6 span {
+  color: #C7C7C7;
+  font-weight: 300;
+  margin-left: 5px;
+  font-size: 15px;
+}
+.modal#importTour .input_box, .side#importTour .input_box {
+  margin-bottom: 20px;
+}
+.modal#importTour p, .side#importTour p {
+  margin-top: 0;
+  font-size: 17px;
+  line-height: 21px;
+  text-align: left;
+  margin-bottom: 22px;
+  font-weight: 400;
+}
 
 /* modal */
 .come-from-modal.left .modal-dialog,
@@ -1132,7 +1170,12 @@ select.licence {
 .modal#getLink .modal-dialog .modal-footer,
 .modal#modalExport .modal-dialog .modal-footer {
   display: block;
-  padding: 20px 50px 50px 50px;
+  padding: 20px 50px 20px 50px;
+  position: relative;
+}
+.modal#getLink .modal-dialog .modal-footer:nth-child(1),
+.modal#modalExport .modal-dialog .modal-footer:nth-child(1) {
+  opacity: 0.2;
 }
 .modal#getLink .modal-dialog .modal-footer h4,
 .modal#modalExport .modal-dialog .modal-footer h4 {
@@ -1141,9 +1184,165 @@ select.licence {
   margin-bottom: 15px;
   position: relative;
 }
+.modal#getLink .modal-dialog .modal-footer img.qrCode,
+.modal#modalExport .modal-dialog .modal-footer img.qrCode {
+  width: 70px;
+  float: left;
+}
+.modal#getLink .modal-dialog .modal-footer p,
+.modal#modalExport .modal-dialog .modal-footer p {
+  display: block !important;
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.modal#getLink .modal-dialog .modal-footer p.send,
+.modal#modalExport .modal-dialog .modal-footer p.send {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.modal#getLink .modal-dialog .modal-footer p b,
+.modal#modalExport .modal-dialog .modal-footer p b {
+  font-weight: 500;
+}
+.modal#getLink .modal-dialog .modal-footer .enable,
+.modal#modalExport .modal-dialog .modal-footer .enable {
+  width: 100%;
+  display: flex;
+  float: right;
+  position: absolute;
+  top: 22px;
+  right: 50px;
+  width: auto;
+}
+.modal#getLink .modal-dialog .modal-footer .enable p,
+.modal#modalExport .modal-dialog .modal-footer .enable p {
+  font-weight: 400;
+  float: left;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button-cover,
+.modal#getLink .modal-dialog .modal-footer .enable .knobs,
+.modal#getLink .modal-dialog .modal-footer .enable .layer,
+.modal#modalExport .modal-dialog .modal-footer .enable .button-cover,
+.modal#modalExport .modal-dialog .modal-footer .enable .knobs,
+.modal#modalExport .modal-dialog .modal-footer .enable .layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button,
+.modal#modalExport .modal-dialog .modal-footer .enable .button {
+  float: left;
+  position: relative;
+  top: 50%;
+  width: 50px;
+  height: 24px;
+  margin: -2px auto 0 auto;
+  overflow: hidden;
+  margin-left: 10px;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.off .knobs:before,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.off .knobs:before {
+  width: 46px;
+  border-radius: 100px;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.off .knobs:before,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.off .knobs:before {
+  /* margin-left: -26px; */
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.off.knobs,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.off.knobs {
+  display: none;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.off .knobs:before,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.off .knobs:before {
+  position: absolute;
+  top: 3px;
+  width: 17px;
+  height: 17px;
+  letter-spacing: 0px;
+  line-height: 4px;
+  padding: 9px 3px;
+  border-radius: 50%;
+  text-align: center;
+  transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+  content: "";
+  left: 3px;
+  font-size: 9px;
+  color: black;
+  font-weight: 700;
+  background-color: white;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.off .checkbox ~ .layer,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.off .checkbox ~ .layer {
+  background-color: #f0f0f0;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.on .knobs:before,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.on .knobs:before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 31px;
+  width: 17px;
+  height: 17px;
+  color: black;
+  font-size: 9px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 0px;
+  line-height: 4px;
+  padding: 9px 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button .checkbox ~ .layer,
+.modal#modalExport .modal-dialog .modal-footer .enable .button .checkbox ~ .layer {
+  background-color: #65b83f;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button,
+.modal#getLink .modal-dialog .modal-footer .enable .button .layer,
+.modal#modalExport .modal-dialog .modal-footer .enable .button,
+.modal#modalExport .modal-dialog .modal-footer .enable .button .layer {
+  border-radius: 100px;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .button.b2,
+.modal#modalExport .modal-dialog .modal-footer .enable .button.b2 {
+  border-radius: 2px;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .checkbox,
+.modal#modalExport .modal-dialog .modal-footer .enable .checkbox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .knobs,
+.modal#modalExport .modal-dialog .modal-footer .enable .knobs {
+  z-index: 2;
+}
+.modal#getLink .modal-dialog .modal-footer .enable .layer,
+.modal#modalExport .modal-dialog .modal-footer .enable .layer {
+  width: 100%;
+  background-color: #f0f0f0;
+  transition: 0.3s ease all;
+  z-index: 1;
+}
 .modal#getLink .modal-dialog .modal-footer .link,
 .modal#modalExport .modal-dialog .modal-footer .link {
   position: relative;
+  float: left;
+  width: calc(100% - 82px);
+  margin-top: 13px;
+  margin-right: 0;
 }
 .modal#getLink .modal-dialog .modal-footer .link > div,
 .modal#modalExport .modal-dialog .modal-footer .link > div {
@@ -1155,8 +1354,30 @@ select.licence {
   top: 5px;
   right: 5px;
   height: 40px;
-  padding-left: 45px;
-  padding-right: 16px;
+  width: 40px;
+  margin-top: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: 0.2s all ease-in-out;
+}
+.modal#getLink .modal-dialog .modal-footer .link > div button:before,
+.modal#modalExport .modal-dialog .modal-footer .link > div button:before {
+  content: "";
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  height: 50px;
+  left: -5px;
+  top: -5px;
+  position: absolute;
+}
+.modal#getLink .modal-dialog .modal-footer .link > div button:hover,
+.modal#modalExport .modal-dialog .modal-footer .link > div button:hover {
+  background-color: #F4F4F4;
+  transition: 0.2s all ease-in-out;
+}
+.modal#getLink .modal-dialog .modal-footer .link > div button:focus,
+.modal#modalExport .modal-dialog .modal-footer .link > div button:focus {
+  outline: none;
+  box-shadow: none;
 }
 .modal#getLink .modal-dialog .modal-footer .link > div .copied,
 .modal#modalExport .modal-dialog .modal-footer .link > div .copied {
@@ -1167,7 +1388,7 @@ select.licence {
   display: inline-block;
   padding: 7px;
   position: absolute;
-  right: 28px;
+  right: -8px;
   top: -35px;
 }
 .modal#getLink .modal-dialog .modal-footer .link > div .copied:before,
@@ -1178,18 +1399,131 @@ select.licence {
   width: 7px;
   height: 12px;
   background-repeat: no-repeat;
-  right: 22px;
+  right: calc(50% - 3.5px);
   bottom: -12px;
   background-size: 100%;
   transition: all 0.2s;
 }
+.modal#getLink .modal-dialog .modal-footer .link > div .copied p,
+.modal#modalExport .modal-dialog .modal-footer .link > div .copied p {
+  margin-bottom: 0;
+}
 .modal#getLink .modal-dialog .modal-footer .link img,
 .modal#modalExport .modal-dialog .modal-footer .link img {
-  top: 9px;
+  width: 20px;
+  left: 10px;
+  top: 10px;
 }
-.modal#getLink .modal-dialog .modal-footer .link input,
-.modal#modalExport .modal-dialog .modal-footer .link input {
+.modal#getLink .modal-dialog .modal-footer .link input[type=text],
+.modal#modalExport .modal-dialog .modal-footer .link input[type=text] {
   padding-right: 115px;
+}
+.modal#getLink .modal-dialog .modal-footer .link input[type=text] ::selection,
+.modal#modalExport .modal-dialog .modal-footer .link input[type=text] ::selection {
+  background-color: red;
+}
+.modal#getLink .modal-dialog .modal-footer .link input[type=text] ::-moz-selection,
+.modal#modalExport .modal-dialog .modal-footer .link input[type=text] ::-moz-selection {
+  background-color: red;
+}
+.modal#getLink .modal-dialog .modal-footer .link.share,
+.modal#modalExport .modal-dialog .modal-footer .link.share {
+  float: none;
+  width: 100%;
+  margin: 0;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link,
+.modal#modalExport .modal-dialog .modal-footer .password_link {
+  margin-top: 20px;
+  display: flex;
+  margin: 0;
+  margin-top: 20px;
+  margin-bottom: 25px;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link label,
+.modal#modalExport .modal-dialog .modal-footer .password_link label {
+  font-weight: 600;
+  width: 150px;
+  font-size: 15px;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link label span,
+.modal#modalExport .modal-dialog .modal-footer .password_link label span {
+  font-weight: 300;
+  font-size: 13px;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link input[type=checkbox],
+.modal#modalExport .modal-dialog .modal-footer .password_link input[type=checkbox] {
+  width: 16px;
+  accent-color: black;
+  height: 16px;
+  margin-right: 12px;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link input[type=password],
+.modal#modalExport .modal-dialog .modal-footer .password_link input[type=password] {
+  margin-left: 0;
+  margin-right: 0;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link button.show,
+.modal#getLink .modal-dialog .modal-footer .password_link button.hide,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.show,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.hide {
+  position: absolute;
+  top: 5px;
+  right: 55px;
+  height: 40px;
+  width: 40px;
+  margin-top: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
+  background-color: transparent;
+  transition: 0.2s all ease-in-out;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link button.show img,
+.modal#getLink .modal-dialog .modal-footer .password_link button.hide img,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.show img,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.hide img {
+  width: 25px;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link button.show:focus,
+.modal#getLink .modal-dialog .modal-footer .password_link button.hide:focus,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.show:focus,
+.modal#modalExport .modal-dialog .modal-footer .password_link button.hide:focus {
+  outline: none;
+  box-shadow: none;
+}
+.modal#getLink .modal-dialog .modal-footer .password_link .link,
+.modal#modalExport .modal-dialog .modal-footer .password_link .link {
+  margin-top: 0;
+}
+.modal#getLink .modal-dialog .modal-footer button.save,
+.modal#getLink .modal-dialog .modal-footer button.saved,
+.modal#modalExport .modal-dialog .modal-footer button.save,
+.modal#modalExport .modal-dialog .modal-footer button.saved {
+  float: right;
+  margin-top: -10px;
+  display: block !important;
+  height: 40px;
+  margin-right: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.modal#getLink .modal-dialog .modal-footer button.saved,
+.modal#modalExport .modal-dialog .modal-footer button.saved {
+  background-color: #161616;
+  color: white;
+  position: relative;
+  padding-right: 30px;
+}
+.modal#getLink .modal-dialog .modal-footer button.saved:after,
+.modal#modalExport .modal-dialog .modal-footer button.saved:after {
+  content: "";
+  position: absolute;
+  background: url("/src/assets/img/icon_check.svg");
+  width: 15px;
+  height: 15px;
+  background-repeat: no-repeat;
+  right: 8px;
+  top: 11px;
 }
 
 .modal#modalExport .modal-footer {
@@ -1574,6 +1908,53 @@ select.licence {
   margin-bottom: 10px;
   display: block;
 }
+@media (max-height: 700px) {
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body {
+    position: relative;
+    top: 0px;
+    bottom: 0;
+    transform: none;
+    margin: 0 auto;
+    display: block;
+    left: 0;
+    height: 80%;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .pic {
+    height: 100%;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .pic img.panorama {
+    max-height: 70%;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .pic .gbtn {
+    bottom: 0;
+    position: relative;
+    margin-top: -50px;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload .pic_box {
+    flex: 1;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload .pic_box label.add_pic {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload .drop {
+    aspect-ratio: auto;
+    background-size: 100%;
+    height: 100%;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload .drop:before {
+    display: none;
+  }
+  .modal#uploadPanorama .modal-dialog .modal-content .modal-body .upload .drop p {
+    margin-top: 8%;
+  }
+}
 
 .about {
   background-color: white;
@@ -1823,7 +2204,7 @@ header {
   width: 100%;
   background-color: #F1BB45;
   position: fixed;
-  z-index: 10;
+  z-index: 20;
 }
 header h1 {
   position: absolute;
@@ -1915,7 +2296,7 @@ nav {
   position: fixed;
   width: 100%;
   margin-top: 56px;
-  /*  z-index: 10; */
+  z-index: 10;
   background-color: white;
 }
 nav ul {

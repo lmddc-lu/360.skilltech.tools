@@ -12,6 +12,7 @@ async function fetchGet(url){
       method: "GET",
       mode: "cors",
       credentials: 'include',
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
       },
@@ -269,8 +270,10 @@ function fnCounter(el){
   let textEl = el;
   let counter = document.querySelector(textEl.dataset.fnTarget);
   if(counter === null){
-    console.log("Error: Add a 'data-fn-target' attribute to the input\
-     field with a query selector targetting the element displaying the counter");
+    console.error("Add a 'data-fn-target' attribute to the input\
+ field with a query selector targetting the element displaying the counter");
+    console.log(el);
+    return;
   }
   let maximumCharacters = textEl.getAttribute("maxlength") ? textEl.getAttribute("maxlength") : 42;
   let warningCharacters = Math.round(maximumCharacters * 0.7);

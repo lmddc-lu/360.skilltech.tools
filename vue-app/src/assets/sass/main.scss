@@ -121,6 +121,20 @@ a.btn{
         &:focus{
             box-shadow: 0 0 0 0.25rem rgb(0 0 0 / 10%);
         }
+        &.import{
+            span{ 
+                background: url("/src/assets/img/icon_import.svg")no-repeat;
+                background-size: 17px;
+                background-position: center;
+            transition: 0.2s all ease-in-out;
+            }
+            &:hover{
+                transition: 0.2s all ease-in-out;
+                span{
+                    background-size: 20px;
+                }
+            }
+        }
     }
 }
 
@@ -257,6 +271,7 @@ button{
         }
     }
 }
+
 @keyframes rotate-animation {
     0% {
         transform: rotate(0deg);
@@ -788,6 +803,34 @@ select.licence{
            }
         }
     }
+    &#importTour{
+        h5{
+            margin-bottom: 30px;
+        }
+        h6{
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            span{
+                color: #C7C7C7;
+                font-weight: 300;
+                margin-left: 5px;
+                font-size: 15px;
+            }
+        }
+        .input_box{
+            margin-bottom: 20px;
+        }
+        p{
+            margin-top: 0;
+            font-size: 17px;
+            line-height: 21px;
+            text-align: left;
+            margin-bottom: 22px;
+            font-weight: 400;
+        }
+    }
 }
 /* modal */
 
@@ -1091,51 +1134,309 @@ select.licence{
         }
         .modal-footer{
             display: block;
-            padding: 20px 50px 50px 50px;
+            padding: 20px 50px 20px 50px;
+            position: relative;
+            &:nth-child(1){
+                opacity: .2;
+            }
             h4{
                 font-weight: 700;
                 font-size: 19px;
                 margin-bottom: 15px;
                 position: relative;
             }
-           .link{
-            position: relative;
-            > div{
-                display: contents;
-                button{
-                    position: absolute;
-                    top: 5px;
-                    right: 5px;
-                    height: 40px;
-                    padding-left: 45px;
-                    padding-right: 16px;
+            img.qrCode{
+                width: 70px;
+                float: left;
+            }
+            p{
+                display: block!important;
+                margin-bottom: 20px;
+                font-size: 14px;
+                line-height: 20px;
+                &.send{
+                    margin-top: 30px;
+                    margin-bottom: 10px;
+                    font-weight: 600;
+                    font-size: 15px;
                 }
-                .copied{
-                    border-radius: 3px;
-                    color: white;
-                    font-size: 11px;
-                    background-color: #000;
-                    display: inline-block;
-                    padding: 7px;
+                b{
+                    font-weight: 500;
+                }
+            }
+            .enable{
+                width: 100%;
+                display: flex;
+                float: right;
+                position: absolute;
+                top: 22px;
+                right: 50px;
+                width: auto;
+                
+                p{
+                    font-weight: 400;
+                    float: left;
+ 
+                } 
+                  .button-cover,
+                  .knobs,
+                  .layer {
                     position: absolute;
-                    right: 28px;
-                    top: -35px;
-                    &:before{
-                        @include before_svg(triangle,7px,12px);
-                        right: 22px;
-                        bottom: -12px;
-                        background-size: 100%;
-                        transition: all 0.2s;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                  }
+                  
+                  .button {
+                    float: left;
+                    position: relative;
+                    top: 50%;
+                    width: 50px;
+                    height: 24px;
+                    margin: -2px auto 0 auto;
+                    overflow: hidden;
+                    margin-left: 10px;
+                    &.off{
+                        .knobs:before {
+                            width: 46px;
+                            border-radius: 100px;
+                          }
+                          
+                          .knobs:before {
+                            /* margin-left: -26px; */
+                          }
+                          &.knobs{
+                            display: none;
+                          }
+                          .knobs:before {
+                            position: absolute;
+                            top: 3px;
+                            width: 17px;
+                            height: 17px;
+                            letter-spacing: 0px;
+                            line-height: 4px;
+                            padding: 9px 3px;
+                            border-radius: 50%;
+                            text-align: center;
+                            transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+                            content: "";
+                            left: 3px;
+                            font-size: 9px;
+                            color: black;
+                            font-weight: 700;
+                            background-color: white;
+                          }
+                          
+                          .checkbox ~ .layer {
+                            background-color: #f0f0f0;
+                          }
+                    }
+                    &.on{
+                    .knobs:before {
+                        content: "";
+                        position: absolute;
+                        top: 3px;
+                        left: 31px;
+                        width: 17px;
+                        height: 17px;
+                        color: black;
+                        font-size: 9px;
+                        font-weight: bold;
+                        text-align: center;
+                        letter-spacing: 0px;
+                        line-height: 4px;
+                        padding: 9px 3px;
+                        background-color: white;
+                        border-radius: 50%;
+                        transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+                        }
+
+                    }
+                    .checkbox ~ .layer {
+                        background-color: #65b83f;
+                      }
+                  }
+                  
+                  .button,
+                  .button .layer {
+                    border-radius: 100px;
+                  }
+                  
+                  .button.b2 {
+                    border-radius: 2px;
+                  }
+                  
+                  .checkbox {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    padding: 0;
+                    margin: 0;
+                    opacity: 0;
+                    cursor: pointer;
+                    z-index: 3;
+                  }
+                  
+                  .knobs {
+                    z-index: 2;
+                  }
+                  
+                  .layer {
+                    width: 100%;
+                    background-color: #f0f0f0;
+                    transition: 0.3s ease all;
+                    z-index: 1;
+                  }
+            }
+            
+            .link{
+                position: relative;
+                float: left;
+                width: calc(100% - 82px);
+                margin-top: 13px;
+                margin-right: 0;
+                > div{
+                    display: contents;
+                    button{
+                        position: absolute;
+                        top: 5px;
+                        right: 5px;
+                        height: 40px;
+                        width: 40px;
+                        margin-top: 0;
+                        border: 1px solid rgba(0, 0, 0, 0.1);
+                        border: none;
+                        transition: 0.2s all ease-in-out;
+                        &:before{
+                            content: '';
+                            border-left: 1px solid rgba(0, 0, 0, 0.1);
+                            height: 50px;
+                            left: -5px;
+                            top: -5px;
+                            position: absolute;
+                        }
+                        &:hover{
+                            background-color: #F4F4F4;
+                            transition: 0.2s all ease-in-out;
+                        }
+                        &:focus{
+                            outline: none;
+                            box-shadow: none;
+                        }
+                    }
+                    .copied{
+                        border-radius: 3px;
+                        color: white;
+                        font-size: 11px;
+                        background-color: #000;
+                        display: inline-block;
+                        padding: 7px;
+                        position: absolute;
+                        right: -8px;
+                        top: -35px;
+                        &:before{
+                            @include before_svg(triangle,7px,12px);
+                            right: calc(50% - 3.5px);
+                            bottom: -12px;
+                            background-size: 100%;
+                            transition: all 0.2s;
+                        }
+                        p{
+                            margin-bottom: 0;
+                        }
                     }
                 }
+                img{
+                    width: 20px;
+                    left: 10px;
+                    top: 10px;
+                }
+                input[type=text]{
+                    padding-right: 115px;
+                    ::selection{
+                        background-color: red;
+                    }
+                    ::-moz-selection{
+                        background-color: red;
+                    }
+                }
+                &.share{
+                    float: none;
+                    width: 100%;
+                    margin: 0;
+                }
             }
-            img{
-                top:9px;
+            .password_link{
+                margin-top: 20px;
+                display: flex;
+                margin: 0;
+                margin-top: 20px;
+                margin-bottom: 25px;
+                label{
+                    font-weight: 600;
+                    width: 150px;
+                    font-size: 15px;
+                    span{
+                        font-weight: 300;
+                        font-size: 13px;
+                    }
+                }
+                input[type=checkbox]{
+                    width: 16px;
+                    accent-color:black;
+                    height: 16px;
+                    margin-right: 12px;
+                }
+                input[type=password]{
+                    margin-left: 0;
+                    margin-right: 0;
+                }
+                button.show,
+                button.hide{
+                    position: absolute;
+                    top: 5px;
+                    right: 55px;
+                    height: 40px;
+                    width: 40px;
+                    margin-top: 0;
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    border: none;
+                    background-color: transparent;
+                    transition: 0.2s all ease-in-out;
+                    img{
+                        width: 25px;
+                    }
+                    &:focus{
+                        outline: none;
+                        box-shadow: none;
+                    }
+                }
+                .link{
+                    margin-top: 0;
+                }
             }
-            input{
-                padding-right: 115px;
+            button.save,
+            button.saved{
+                float: right;
+                margin-top: -10px;
+                display: block!important;
+                height: 40px;
+                margin-right: 0;
+                padding-left: 16px;
+                padding-right: 16px;
             }
-           } 
+            button.saved{
+                background-color: $mainDark;
+                color: white;
+                position: relative;
+                padding-right: 30px;
+                &:after{
+                    @include before_svg(icon_check,15px,15px);
+                    right: 8px;
+                    top: 11px;
+                }
+            }
         }
     }
 }
@@ -1522,6 +1823,55 @@ select.licence{
                        }
                     }
                 }
+                @media(max-height:700px){
+                    position: relative;
+                    top: 0px;
+                    bottom: 0;
+                    transform: none;
+                    margin: 0 auto;
+                    display: block;
+                    left: 0;
+                    height: 80%;
+                    .pic{
+                        height: 100%;
+                        img{
+                            &.panorama{
+                                max-height: 70%;
+                            }
+                        }
+                        .gbtn{
+                            bottom: 0;
+                            position: relative;
+                            margin-top: -50px;
+                        }
+                    }
+                    .upload{
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        .pic_box{
+                            flex: 1;
+                            label{
+                                &.add_pic{
+                                    display: flex;
+                                    flex-direction: column;
+                                    height: 100%;
+                                }
+                            }
+                        }
+                        .drop{
+                            aspect-ratio: auto;
+                            background-size: 100%;
+                            height: 100%;
+                            &:before{
+                                display: none;
+                            }
+                            p{
+                                margin-top: 8%;
+                            }
+                        }
+                    }
+                 }
             }
         }
     }
@@ -1779,7 +2129,7 @@ header{
     width: 100%;
     background-color: $mainColor;
     position: fixed;
-    z-index: 10;
+    z-index: 20;
     h1{
         position: absolute;
         img{
@@ -1874,7 +2224,7 @@ nav{
     position: fixed;
     width: 100%;
     margin-top: 56px;
-   /*  z-index: 10; */
+    z-index: 10;
     background-color: white;
     ul{
         padding: 40px 0px;

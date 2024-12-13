@@ -164,10 +164,6 @@ async function handleSaveSpot (){
 }
 
 async function handleSavePoi (){
-  if (!selectedPoi.value.title){
-    selectedPoi.value.showErrors = true;
-    return;
-  }
   let formData = new FormData();
   formData.append("id", selectedPoi.value.id);
   formData.append("spot_id", route.params.spotId);
@@ -180,6 +176,7 @@ async function handleSavePoi (){
   formData.append("template", selectedPoi.value.template);
   if(poiInputRef.value.file){
     formData.append("file", poiInputRef.value.file);
+    poiInputRef.value.reset();
   }
   formData.append("delete_image", selectedPoi.value.delete_image == true ? 1 : 0 );
   formData.append("csrf", csrf.value);
@@ -639,7 +636,10 @@ onUnmounted(() => {
                   <div class="poi" v-for="poi, index in pois">
                     <div class="left">
                       <img :src="'/poi_icons/' + poi.icon +'.svg'" alt="POI about" class="hotspotIcon" @click.prevent="showPoi" :data-id="poi.id" :data-index="index">
-                      <p @click.prevent="showPoi" :data-id="poi.id" :data-index="index">{{ poi.title }}</p>
+                      <p v-if="poi.title" @click.prevent="showPoi" :data-id="poi.id" :data-index="index">{{ poi.title }}</p>
+                      <p v-else @click.prevent="showPoi" :data-id="poi.id" :data-index="index">
+                        {{ poi.text.length > 40 ? poi.text.substring(0, 38) + "..." : poi.text}}
+                      </p>
                     </div>
                     <div>
                       <a @click.prevent="handleEditPoi" :data-index="index" :data-id="poi.id">
@@ -656,13 +656,11 @@ onUnmounted(() => {
                     <span></span>
                     <img src="/src/assets/img/icon_hotspotAdd2.svg" alt="icon hotspot">
                   </div>
-                  
                   <p v-show="action != 'newPoi'" @click="action = 'newPoi'">Add a new <span>point of interest</span></p>
                   <p v-show="action == 'newPoi'" class="click"><span>Click on the 360° view</span> to <br> place a point of interest</p>
                   <button v-show="action == 'newPoi'" type="button" class="btn btn-secondary" @click.prevent="action = null">Cancel</button>
                 </div>
               </div>
-
             </div>
           </div>
           <div class="modal-footer">
@@ -725,17 +723,12 @@ onUnmounted(() => {
               </div>
             </div>
             <div>
-              <h3>Title <span class="required">*</span></h3>
-              <!-- Jess : Add a CSS for the error class on input below -->
+              <h3>Title <span>optional</span></h3>
               <input type="text" placeholder="Cool title" :class="{'error': selectedPoi.title == ''}" v-model="selectedPoi.title" @input="updatePoiPreview">
-              <div class="error">
-                <span v-show="!selectedPoi.title && selectedPoi.showErrors">Please add a title to your hotspot</span>
-              </div>
-
             </div>
             <div>
               <h3>Description <span>optional</span></h3>
-              <textarea name="description" id="" placeholder="Add a description" required cols="30" rows="10" v-model="selectedPoi.text" @input="updatePoiPreview"></textarea>
+              <textarea name="description" id="" placeholder="Add a description" required cols="30" rows="10" v-model="selectedPoi.text" @input="updatePoiPreview" style="font-family: monospace"></textarea>
             </div>
           </div>
           <div class="modal-footer">
@@ -851,7 +844,7 @@ onUnmounted(() => {
             </button>
           </div>
           <div class="modal-body">
-            <p>Are you sure you want to delete this panorama? This action cannot be undone.</p>
+            <p>Are you sure you want to delete this 360° photo? This action cannot be undone.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

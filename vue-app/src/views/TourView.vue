@@ -1309,7 +1309,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="modal-footer">
-          <div class="link">
+          <div class="link download">
             <a class="btn link btn-primary" target="_blank" :href="'/exportTour.php?tour_id=' + tour.id" >Download Zip</a>
           </div> 
           <p>File size: {{ tourSizeMB }}MB</p>

@@ -1344,6 +1344,21 @@ select.licence {
   margin-top: 13px;
   margin-right: 0;
 }
+.modal#getLink .modal-dialog .modal-footer .link.download,
+.modal#modalExport .modal-dialog .modal-footer .link.download {
+  width: auto;
+  margin-top: 0;
+  float: right;
+}
+.modal#getLink .modal-dialog .modal-footer .link.download a,
+.modal#modalExport .modal-dialog .modal-footer .link.download a {
+  width: auto;
+  margin-top: 0;
+}
+.modal#getLink .modal-dialog .modal-footer .link.download p,
+.modal#modalExport .modal-dialog .modal-footer .link.download p {
+  float: left;
+}
 .modal#getLink .modal-dialog .modal-footer .link > div,
 .modal#modalExport .modal-dialog .modal-footer .link > div {
   display: contents;
@@ -2573,9 +2588,11 @@ main .list .thumbnail_list .panorama.startingPoint .pic_box .start {
   border-radius: 22px;
   left: 8px;
   top: 6px;
+  z-index: 10;
 }
 main .list .thumbnail_list .panorama.startingPoint .pic_box .start img {
   width: 10px;
+  filter: none !important;
 }
 main .list .thumbnail_list .panorama.startingPoint .pic_box .start p {
   color: white;

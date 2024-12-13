@@ -25,10 +25,25 @@ AFRAME.registerComponent("center", {
     let children = this.el.children;
     let height = 0;
     let length = 0;
+    let skip = [];
+    // First loop to compute the adition of all height
     for (let i=0; i<children.length; i++){
       if ( !children[i].getAttribute('center') || children[i].getAttribute('center').disabled !== "true" ){
-        height += children[i].getAttribute('geometry').height;
-        length++;
+        if (children[i].getAttribute('geometry')){
+          if (children[i].getAttribute('geometry').height != 0){
+            height += children[i].getAttribute('geometry').height;
+            length++;
+          } else {
+            // The height is 0, we will skip this element in the placement loop
+            skip.push(i);
+          }
+        } else if (children[i].getAttribute('height')){
+          if (Number(children[i].getAttribute('height')) != 0){
+            height += Number(children[i].getAttribute('height'));
+            length++;
+          } else {
+          }
+        }
       }
     }
     height += (length - 1) * spacing + marginTop + marginBottom;
@@ -42,6 +57,10 @@ AFRAME.registerComponent("center", {
 
     let pos;
     for (let i=0; i<children.length; i++){
+      if (skip.includes(i)){
+        // The element's height is 0, we will skip its placement
+        continue;
+      }
       if (children[i].getAttribute('float')){
         if ( children[i].getAttribute('float').top && !Number.isNaN(children[i].getAttribute('float').top) ){
           children[i].setAttribute('position', {
@@ -83,13 +102,25 @@ AFRAME.registerComponent("center", {
         // we compute the initial position
         pos = -marginTop;
       } else {
-        pos = pos - children[i-1].getAttribute('geometry').height - spacing;
+        if (children[i-1].getAttribute('geometry')){
+          pos = pos - children[i-1].getAttribute('geometry').height - spacing;
+        } else if (children[i-1].getAttribute('height')){
+          pos = pos - Number(children[i-1].getAttribute('height')) - spacing;
+        }
       }
-      children[i].setAttribute('position', {
-        x: children[i].getAttribute('position').x,
-        y: pos - children[i].getAttribute('geometry').height / 2 + verticalShift,
-        z: children[i].getAttribute('position').z
-      });
+      if (children[i].getAttribute('geometry')){
+        children[i].setAttribute('position', {
+          x: children[i].getAttribute('position').x,
+          y: pos - children[i].getAttribute('geometry').height / 2 + verticalShift,
+          z: children[i].getAttribute('position').z
+        });
+      } else if (children[i].getAttribute('height')){
+        children[i].setAttribute('position', {
+          x: children[i].getAttribute('position').x,
+          y: pos - Number(children[i].getAttribute('height')) / 2 + verticalShift,
+          z: children[i].getAttribute('position').z
+        });
+      }
       children[i].setAttribute('baseline', "center");
     }
   }

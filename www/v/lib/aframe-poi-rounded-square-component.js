@@ -4,7 +4,7 @@ AFRAME.registerComponent('poi-rounded-square', {
     height: {default: 0, min: 0, type: 'number'},
     minWidth: {default: 0, min: 0, type: 'number'},
     minHeight: {default: 0, min: 0, type: 'number'},
-    ratio: {default: 1, min: 0, type: 'number'},
+    ratio: {default: 0, min: 0, type: 'number'},
     image: {default: "", type: 'string'},
     radius: {default: 0.1, min: 0, type: 'number'},
     corner: {default: ['tr', 'tl', 'br', 'bl'], type: 'array'},
@@ -34,11 +34,13 @@ AFRAME.registerComponent('poi-rounded-square', {
     this.el.object3D.add(this.mesh);
   },
   getMesh: function(width,height,ratio,corner,anchor,image){
-    if (ratio < 1){
+    if (ratio != 0){
       if (width != 0) {
         height = width / ratio;
+        this.el.setAttribute("height", height);
       } else if (height != 0){
         width = height * ratio;
+        this.el.setAttribute("width", width);
       } else {
         console.error("When ratio attribute is set, you must set width or height attributes");
         width = 1;
@@ -47,6 +49,7 @@ AFRAME.registerComponent('poi-rounded-square', {
     }
 
     const radius = this.data.radius
+    if (radius == 0) corner = [];
 
     var texture;
     if (image) {
@@ -144,6 +147,8 @@ AFRAME.registerComponent('poi-rounded-square', {
         reflectivity: 0,
         color: 0xffffff,
         refractionRatio: 0,
+        transparent: true,
+        alphaTest: 0.1,
       });
     } else {
       material = new THREE.MeshBasicMaterial({

@@ -537,7 +537,7 @@ input,textarea{
         color: rgba(0,0,0,.1);
     }
     &.error{
-        /* border: 1px solid #eb752c */;
+        /* border: 1px solid #eb752c */
         border: 1px solid black;
     }
 }
@@ -1296,6 +1296,19 @@ select.licence{
                 width: calc(100% - 82px);
                 margin-top: 13px;
                 margin-right: 0;
+                &.download{
+                    width: auto;
+                    margin-top: 0;
+                    float: right;
+                    a{
+                        
+                        width: auto;
+                        margin-top: 0;
+                    }
+                    p{
+                        float: left;
+                    }
+                }
                 > div{
                     display: contents;
                     button{
@@ -2489,8 +2502,10 @@ main{
                             border-radius: 22px;
                             left: 8px;
                             top: 6px;
+                            z-index: 10;
                             img{
                                 width: 10px;
+                                filter: none!important;
                             }
                             p{
                                 color: white;

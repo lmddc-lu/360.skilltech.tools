@@ -5,20 +5,21 @@
   visible="true"
   position="0, 0, 5"
 >
-  <!-- Icon -->
-  <a-entity position="-0.025, 0.05, 0">
-    <a-entity
-      position="-${sx_half}, ${sy_half}, 0.1"
-      geometry="primitive: plane; height: 0.25; width: 0.25"
-      material="shader: flat; src: ${icon}; transparent: true; opacity: 1"
-    ></a-entity>
-  </a-entity>
 
   <!-- Image -->
   <a-entity position="-0.05, 0, 0">
     <a-entity
       poi-rounded-square="width: ${sx}; height: ${sy}; radius: 0.04; corner: tl, tr, bl, br; image: ${image}"
       position="-${sx_half}, 0, 0"
+    ></a-entity>
+  </a-entity>
+
+  <!-- Icon -->
+  <a-entity position="-0.025, 0.05, 0.1">
+    <a-entity
+      position="-${sx_half}, ${sy_half}, 0.1"
+      geometry="primitive: plane; height: 0.25; width: 0.25"
+      material="shader: flat; src: ${icon}; transparent: true; opacity: 1"
     ></a-entity>
   </a-entity>
 
@@ -49,22 +50,12 @@
       material="shader: flat; color: blue; transparent: true; opacity: 0; alphaTest: 0.3;"
     ></a-text>
 
-    <!-- Text -->
-    <a-text
-      value="${text}"
-      width="0.9"
-      color="black"
-      wrap-count="38"
-      baseline="center"
-      align="left"
-      anchor="center"
-      z-offset="0.1"
-      negate="false"
-      font="./font/opensans/OpenSans-Medium-msdf.json"
-      geometry="primitive: plane; width: 0; height: 0;"
-      material="shader: flat; color: red; transparent: true; opacity: 0; alphaTest: 0.3;"
-      position="0, 0, 0"
-    ></a-text>
+
+    <!-- HTML text -->
+    <a-entity
+      poi-rounded-square="width: 0.9; ratio: ${richtextRatio}; radius: 0; image: ${richtext}"
+      position="0, 0, 0.2"
+    ></a-entity>
 
     <!-- Close -->
     <a-entity

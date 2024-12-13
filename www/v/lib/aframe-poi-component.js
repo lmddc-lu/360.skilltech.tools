@@ -17,21 +17,21 @@ AFRAME.registerComponent("poi", {
   },
 
   init: function () {
-    const scene    = this.el.sceneEl;
-    const x        = this.data.x;
-    const y        = this.data.y;
-    const distance = this.data.distance;
-    const width    = this.data.width;
-    const height   = this.data.height;
-    const icon     = this.data.icon;
-    const image    = this.data.image;
-    const imageWidth    = this.data.imageWidth;
-    const imageHeight   = this.data.imageHeight;
-    const text     = this.data.text;
-    const title    = this.data.title;
+    const scene       = this.el.sceneEl;
+    const x           = this.data.x;
+    const y           = this.data.y;
+    const distance    = this.data.distance;
+    const width       = this.data.width;
+    const height      = this.data.height;
+    const icon        = this.data.icon;
+    const image       = this.data.image;
+    const imageWidth  = this.data.imageWidth;
+    const imageHeight = this.data.imageHeight;
+    const text        = this.data.text;
+    const title       = this.data.title;
     const template    = this.data.template;
     var state         = this.data.state;
-    var id         = this.data.id;
+    var id            = this.data.id;
 
     // The POI template file is hardcoded here
     let templateFile;
@@ -67,6 +67,7 @@ AFRAME.registerComponent("poi", {
     el.setAttribute("data-icon", "./img/icon/" + icon);
     el.setAttribute("data-title", title.replaceAll('"', "''"));
     el.setAttribute("data-text", text.replaceAll('"', "''"));
+    el.setAttribute("data-richtext", btoa(unescape(encodeURIComponent(text))));
     el.setAttribute("data-image", image );
     el.setAttribute("data-image-width", imageWidth );
     el.setAttribute("data-image-height", imageHeight );
@@ -88,6 +89,7 @@ AFRAME.registerComponent("poi", {
     async function openPOI_handler(ev, preview=undefined){
       // Create a new entity for our opened POI
       let el = document.createElement("a-entity");
+      //~ let material = el.getObject3D('mesh').material;
       let poisOpen = document.getElementById("pois-open")
 
       // Hide the POI Icons
@@ -96,22 +98,95 @@ AFRAME.registerComponent("poi", {
       icon.object3D.visible = false;
       icon.classList.remove("clickable");
 
+      if (ev.currentTarget.dataset.text){
+        /*
+         * To work, the html2canvas library requires that the HTML code to render is attached to the DOM.
+         * We attach a div to the body element just to create the canvas then we detach it. This div should not be
+         * seen by the user (negative z-index and hidden into a 1px wide div)
+         */
+        let body = document.querySelector("body");
+        // This is the 1px wide container
+        let container = document.createElement("div");
+        container.setAttribute("class", "aframe-poi-text-container");
+        
+        body.appendChild(container);
+        // This is the div that will limit the size of our rendered HTML
+        let externalDiv = document.createElement("div");
+
+        // Finally the div that will contain the HTML we want to render
+        let internalDiv = document.createElement("div");
+        externalDiv.appendChild(internalDiv);
+
+        let converter = new showdown.Converter({tables: true});
+        let output = converter.makeHtml(poi.dataset.text);
+
+        const clean = DOMPurify.sanitize(output, {
+          USE_PROFILES: { html: true },
+          SAFE_FOR_TEMPLATES: true,
+          ALLOWED_TAGS: ['b', 'p', '#text'],
+          FORBID_ATTR: ['style', 'id', 'width', 'height'],
+          ALLOWED_ATTR: ['alt'],
+        });
+        internalDiv.innerHTML = clean;
+        container.appendChild(externalDiv);
+
+        // We generate an image from the text input
+        await html2canvas(externalDiv, {backgroundColor:null, scale: 1}).then(async function(canvas) {
+          const blob = await new Promise(resolve => canvas.toBlob(resolve));
+          // The data-tx, data-ty properties and their halves is used
+          // by the templates to center the elements properly
+          if (canvas.width && canvas.height && canvas.width > canvas.height){
+            el.setAttribute("data-tx", 1 );
+            el.setAttribute("data-tx_half", 0.5 );
+            el.setAttribute("data-ty", (canvas.height/canvas.width) );
+            el.setAttribute("data-ty_half", (canvas.height/canvas.width/2) );
+          } else if(canvas.width && canvas.height) {
+            el.setAttribute("data-tx", (canvas.width/canvas.height) );
+            el.setAttribute("data-tx_half", (canvas.width/canvas.height/2) );
+            el.setAttribute("data-ty", 1);
+            el.setAttribute("data-ty_half", 0.5);
+          } else {
+            el.setAttribute("data-ty", 1);
+            el.setAttribute("data-ty_half", 0.5);
+            el.setAttribute("data-tx", 1);
+            el.setAttribute("data-tx_half", 0.5);
+          }
+          let imgurl = await(URL.createObjectURL(blob));
+          el.setAttribute("data-richtext", imgurl);
+          let ratio = Number(canvas.width) / Number(canvas.height);
+          el.setAttribute("data-richtext-ratio", ratio);
+
+          // Cleaning the DOM
+          body.removeChild(container);
+        });
+      } else {
+        el.setAttribute("data-tx", "0" );
+        el.setAttribute("data-tx_half", "0" );
+        el.setAttribute("data-ty", "0");
+        el.setAttribute("data-ty_half", "0");
+        el.setAttribute("data-richtext", "");
+        el.setAttribute("data-richtext-ratio", 5);
+      }
+
       poisOpen.appendChild(el);
       el.setAttribute("position", this.getAttribute('position'));
       el.setAttribute("rotation", {x: this.dataset.x, y: this.dataset.y})
 
       // Put dynamic data into the POI template
-      el.setAttribute("data-title", ev.currentTarget.dataset.title);
-      el.setAttribute("data-image", ev.currentTarget.dataset.image);
-      el.setAttribute("data-icon", ev.currentTarget.dataset.icon);
-      el.setAttribute("data-text", ev.currentTarget.dataset.text);
+      el.setAttribute("data-title", poi.dataset.title);
+      el.setAttribute("data-image", poi.dataset.image);
+      el.setAttribute("data-icon",  poi.dataset.icon);
+      el.setAttribute("data-text",  poi.dataset.text);
+      //~ el.setAttribute("data-richtext", ev.currentTarget.dataset.richtext);
 
       // We scale the image so that it will not be stretched
       //let size = await getImageSize(ev.target.dataset.image);
       let size = {
-        width: Number(ev.currentTarget.dataset.imageWidth),
-        height: Number(ev.currentTarget.dataset.imageHeight)
-      }
+        width: Number(poi.dataset.imageWidth),
+        height: Number(poi.dataset.imageHeight)
+      };
+      // The data-sx, data-sy properties and their halves is used
+      // by the templates to center all the elements properly
       if (size.width && size.height && size.width > size.height){
         el.setAttribute("data-sx", 1 );
         el.setAttribute("data-sx_half", 0.5 );

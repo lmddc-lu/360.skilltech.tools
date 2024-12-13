@@ -48,37 +48,19 @@ docker compose --profile build up -d
 
 ### Certificates
 
-To work properly, applications based on the A-Frame framework must be served with HTTPS. For the development you may use self signed certificates, you can generate these file with openSSL using the already running containers. Adjust the following line with the domain name you want to use (only modify the CN parameter and don't touch the filename):
-
-```
-docker exec -ti 360skilltechtools-php-dev-1 openssl req -x509 -newkey rsa:4096 -keyout /usr/share/nginx/src/360.skilltech.tools.key -out /usr/share/nginx/src/360.skilltech.tools.crt -sha256 -days 3650 -nodes -subj "/C=XX/ST=Luxembourg/CN=360.skilltech.tools"
-docker exec -ti 360skilltechtools-php-dev-1 chmod ugo+rw /usr/share/nginx/src/360.skilltech.tools.key
-docker exec -ti 360skilltechtools-php-dev-1 chmod ugo+rw /usr/share/nginx/src/360.skilltech.tools.crt
-```
-
-You will need to move the files 360.skilltech.tools.key and 360.skilltech.tools.crt from the /src folder to the /certs folder, then restart the containers.
+You can put your TLS certificate into the `certs` folder as `cert.crt` and `cert.key`. If no certificate is found in this folder, a self-signed certificate is automatically generated when you launch the containers. 
 
 ### Create needed tables into the database
 
-The first time you launch the app (see above), an empty database named "tour" is created. You need to fill it with tables. This is one way to do so:
-
-Launch the dev profile then open the mariadb cli into the maria-db container:
+The first time you launch the app (see above), an empty database named "tour" is created. You need to fill it with tables. You may do that with this one-liner in a terminal:
 ```
-docker exec -ti 360skilltechtools-mariadb-1 mariadb -u root --password=rootpassword tour
+docker exec -ti 360skilltechtools-mariadb-1 sh -c "mariadb -u root -prootpassword tour < /sql_dump/create_tables.sql"
 ```
 
-If you use the docker desktop app, just execute this line ito the mariadb container:
+Or if you use the docker desktop app, execute this line into the mariadb container:
 ```
-mariadb -u root --password=rootpassword tour
+mariadb -u root -prootpassword tour < /sql_dump/create_tables.sql
 ```
-
-You are now into the mariadb shell, all the SQL commands you enter here will be executed into the "tour" database. We will execute the content of a file to create the tables with this command:
-
-```
-source /sql_dump/create_tables.sql
-```
-
-When it's done you can quit the mariadb shell with the ```exit``` command.
 
 ### OIDC
 
@@ -86,18 +68,9 @@ This app needs an OIDC server to authenticate users. To configure the identity p
 
 If you don't have yet an identity provider, you may enable the dev mode that allows you to log in without a password, creating a new account if needed. Put the DEV variable to true in /src/config.php then browse to the page /dev/login.php. Obviously, you must never activate this feature in production.
 
-### Install PHP dependencies
+### PHP libraries dependencies
 
-We use Composer to manage PHP dependencies. If you don't have it installed on your computer you can install it in a container. To do so, open a bash shell in the PHP dev container (it must be running):
-
-    docker exec -ti 360skilltechtools-php-dev-1 bash
-
-Then install composer and the project dependencies
-
-    apt update && apt install unzip
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-    cd /usr/share/nginx && composer install
-
+PHP libraries will be automatically downloaded into the `skilltech-php` image. You can find the composer config files in the conf_php folder.
 
 ### Files permissions
 

@@ -1,0 +1,68 @@
+@import url("/v/font/inter/stylesheet.css");
+
+/*
+ * We remove margins for the first and the last element of the text into POIs
+ */
+.aframe-poi-text-container > div > div > :first-child{
+  margin-top: 0;
+}
+
+.aframe-poi-text-container > div > div > :last-child{
+  margin-bottom: 0;
+}
+
+/* Container that must be hidden but still present into the DOM and rendered */
+.aframe-poi-text-container {
+  width: 1px;
+  height: 1px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: -100;
+  overflow: hidden;
+  font-family: 'Inter',Arial, Helvetica, sans-serif;
+}
+
+/* ExternalDiv: This div defines the rendering of the text in the POI */
+.aframe-poi-text-container > div {
+  width: 1000px;
+  padding: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: -2;
+  overflow: hidden;
+  color: #000;
+  font-size: 50px;
+  background: rgb(150 255 150 / 0);
+}
+
+.aframe-poi-text-container h1{
+  font-size: 80px;
+}
+
+.aframe-poi-text-container h2{
+  font-size: 60px;
+}
+
+.aframe-poi-text-container h3{
+  font-size: 50px;
+}
+
+.aframe-poi-text-container table{
+  border-collapse: collapse;
+}
+
+.aframe-poi-text-container td,
+.aframe-poi-text-container th {
+  border: 1px black solid;
+  padding: 0.2em;
+}
+
+.aframe-poi-text-container th {
+  background-color: #dddddd;
+}
+
+.aframe-poi-text-container td {
+  border: 1px black solid;
+}

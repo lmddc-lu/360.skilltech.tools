@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0] - 2024-12-04
+
+### Added
+
+ - **BREAKING** New parameter in /src/config.php to set memory limit for the export feature
+ - **BREAKING** PHP dependencies added to the PHP image; TLS certs created automatically ; You should restart the containers and force the rebuild of the image, eg.:  
+  ```docker compose --profile prod --build --force-recreate -d```
+ - The text in POIs can now be written using markdown syntax and accept the same range of characters as the browser (eg.: emojis)
+
 ## [1.1.0] - 2024-11-29
 
 ### Added

@@ -104,7 +104,7 @@
 
 <style>
 :root {
-  --v-onboarding-step-arrow-background: #f1bb45;
+  --v-onboarding-step-arrow-background: white;
   /*--v-onboarding-step-arrow-size: 20px;*/
   --v-onboarding-overlay-opacity: 0.3;
   --v-onboarding-step-z: 1001;

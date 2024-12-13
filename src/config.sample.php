@@ -8,7 +8,8 @@ define("DB_HOST","mariadb");
 define("DB_PASSWORD","password");
 define("DB_NAME","tour");
 define("DB_USER","lmddc");
-define("REDIRECT_PROTOCOL","https"); //Set it to http if you use a SSL proxy
+define("REDIRECT_PROTOCOL","https"); // Set it to http if you use a SSL proxy
+define("MEMORY_LIMIT_EXPORT","2048M"); // Max memory that can be used by the export script
 
 define("SKY_WIDTH", 16384);
 define("SKY_HEIGHT", 8192);

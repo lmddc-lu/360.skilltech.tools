@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . "/../config.php";
+ini_set("memory_limit", MEMORY_LIMIT_EXPORT);
 require_once(__DIR__."/../Autoloader.php");
 use \tour\Entity\User;
 use \tour\Entity\Tour;
@@ -43,6 +45,7 @@ $filepath = sys_get_temp_dir() . "/tour_" . $tourId . ".zip" ;
 @unlink($filepath);
 
 if ($zip->open($filepath, \ZIPARCHIVE::CREATE) === TRUE) {
+  try{
   foreach ($images as $img) {
     $filePath = __DIR__.'/../../html/data/image/' . $img['filename'];
     if (file_exists($filePath)){
@@ -84,6 +87,9 @@ if ($zip->open($filepath, \ZIPARCHIVE::CREATE) === TRUE) {
   }
 
   $zip->close();
+  } catch (Exception $e){
+    exit($e);
+  }
   // Let's send the zip file
   header('Content-Type: application/zip');
   header('Content-Disposition: attachment; filename="360_visite.zip"');

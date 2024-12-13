@@ -146,7 +146,7 @@ export const onboardingSteps = [
       title: "360° photo",
       description:"When you hover over the photo, you will see it highlighted in the graph on the right."
     },
-    options: {popper:{placement: 'right'}}
+    options: {popper:{placement: 'bottom'}}
   },
   {
     attachTo: {element: "li.pin"},

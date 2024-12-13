@@ -29,11 +29,19 @@ AFRAME.registerComponent("stretch", {
       if ( children[i].getAttribute('stretch') && children[i].getAttribute('stretch').disabled == "true" ){
         continue;
       }
-      height = height + children[i].getAttribute('geometry').height;
-      length++;
+      if (children[i].getAttribute('geometry')){
+        if (children[i].getAttribute('geometry').height != 0){
+          height = height + children[i].getAttribute('geometry').height;
+          length++;
+        }
+      } else if (children[i].getAttribute('height')) {
+        if (Number(children[i].getAttribute('height')) != 0) {
+          height = height + Number(children[i].getAttribute('height'));
+          length++;
+        }
+      }
     }
     height += marginTop + marginBottom + (length - 1) * spacing;
-    let attributes = this.el.getAttribute("poi-rounded-square");
     if ( this.el.getAttribute('poi-rounded-square') ){
       this.el.setAttribute("poi-rounded-square", {height: height});
     }

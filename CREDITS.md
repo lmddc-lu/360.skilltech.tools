@@ -48,7 +48,7 @@ file - project name - authors
   - aframe-event-set-component.min.js - supermedium/superframe - Kevin Ngo
   - aframe-proxy-event-component.min.js - supermedium/superframe - Kevin Ngo
   - showdown.min.js - showdown - ShowdownJS
-  - html2canvas.min.js - html2canvas - Niklas von Hertzen
+  - snapdom.min.js - snapDOM - ZumerLab
 
 ### Apache license 2.0 and Mozilla Public License 2.0 Licensed
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0] - 2025-09-25
+
+### Fixed
+
+  - Replacing HTML2Canvas library with snapDOM to fix a bug with VR headset browsers
+
 ## [1.2.0] - 2024-12-04
 
 ### Added

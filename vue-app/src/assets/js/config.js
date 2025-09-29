@@ -37,8 +37,8 @@ const config = {
     skyPreloadWidth: 2048,
     skyPreloadHeight: 1024,
 
-    imgMaxSize: 10000000,
-    imgMaxWidth: 4096,
+    poiImgMaxSize: 5000000,
+    poiImgMaxWidth: 2048,
 
     poiThumbWidth: 200,
     tourThumbMaxSize: 100000,

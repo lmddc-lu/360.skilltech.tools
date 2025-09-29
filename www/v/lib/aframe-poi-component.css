@@ -26,7 +26,8 @@
 /* ExternalDiv: This div defines the rendering of the text in the POI */
 .aframe-poi-text-container > div {
   width: 1000px;
-  padding: 0;
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
   position: fixed;
   left: 0;
   top: 0;
@@ -34,7 +35,13 @@
   overflow: hidden;
   color: #000;
   font-size: 50px;
-  background: rgb(150 255 150 / 0);
+  /*background: rgb(150 255 150 / 0.2);*/
+}
+
+.aframe-poi-text-container p{
+  /* Dirty fix: if no background set, the snapdom capture miss the last line of text */
+  background: rgb(255 150 150 / 0);
+  font-size: 50px;
 }
 
 .aframe-poi-text-container h1{

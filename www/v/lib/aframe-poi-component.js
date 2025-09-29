@@ -100,15 +100,18 @@ AFRAME.registerComponent("poi", {
 
       if (ev.currentTarget.dataset.text){
         /*
-         * To work, the html2canvas library requires that the HTML code to render is attached to the DOM.
+         * We use Showdown and DOMPurify to convert markdown to HTML. Then we generate an image from the
+         * HTML using snapDOM to avoid Aframe limitations (limited character set, pure text).
+         * The snapDOM requires that the HTML code to render is attached to the DOM.
          * We attach a div to the body element just to create the canvas then we detach it. This div should not be
-         * seen by the user (negative z-index and hidden into a 1px wide div)
+         * seen by the user (negative z-index and hidden into a 1px wide div).
+         * This solution is really slow in VR headsets browsers, we may use another solution in future.
          */
         let body = document.querySelector("body");
         // This is the 1px wide container
         let container = document.createElement("div");
         container.setAttribute("class", "aframe-poi-text-container");
-        
+
         body.appendChild(container);
         // This is the div that will limit the size of our rendered HTML
         let externalDiv = document.createElement("div");
@@ -130,35 +133,40 @@ AFRAME.registerComponent("poi", {
         internalDiv.innerHTML = clean;
         container.appendChild(externalDiv);
 
-        // We generate an image from the text input
-        await html2canvas(externalDiv, {backgroundColor:null, scale: 1}).then(async function(canvas) {
-          const blob = await new Promise(resolve => canvas.toBlob(resolve));
-          // The data-tx, data-ty properties and their halves is used
-          // by the templates to center the elements properly
-          if (canvas.width && canvas.height && canvas.width > canvas.height){
-            el.setAttribute("data-tx", 1 );
-            el.setAttribute("data-tx_half", 0.5 );
-            el.setAttribute("data-ty", (canvas.height/canvas.width) );
-            el.setAttribute("data-ty_half", (canvas.height/canvas.width/2) );
-          } else if(canvas.width && canvas.height) {
-            el.setAttribute("data-tx", (canvas.width/canvas.height) );
-            el.setAttribute("data-tx_half", (canvas.width/canvas.height/2) );
-            el.setAttribute("data-ty", 1);
-            el.setAttribute("data-ty_half", 0.5);
-          } else {
-            el.setAttribute("data-ty", 1);
-            el.setAttribute("data-ty_half", 0.5);
-            el.setAttribute("data-tx", 1);
-            el.setAttribute("data-tx_half", 0.5);
-          }
-          let imgurl = await(URL.createObjectURL(blob));
-          el.setAttribute("data-richtext", imgurl);
-          let ratio = Number(canvas.width) / Number(canvas.height);
-          el.setAttribute("data-richtext-ratio", ratio);
+        // We generate an image blob from the text input
+        const blob = await snapdom.toBlob(externalDiv, {type: 'png'});
+        // We need to know the size of the generated image
+        const bmp = await createImageBitmap(blob);
+        const blobWidth = bmp.width;
+        const blobHeight = bmp.height;
+        bmp.close();
 
-          // Cleaning the DOM
-          body.removeChild(container);
-        });
+        // The data-tx, data-ty properties and their halves is used
+        // by the templates to properly center the elements
+        if (blobWidth && blobHeight && blobWidth > blobHeight){
+          el.setAttribute("data-tx", 1 );
+          el.setAttribute("data-tx_half", 0.5 );
+          el.setAttribute("data-ty", (blobHeight/blobWidth) );
+          el.setAttribute("data-ty_half", (blobHeight/blobWidth/2) );
+        } else if(blobWidth && blobHeight) {
+          el.setAttribute("data-tx", (blobWidth/blobHeight) );
+          el.setAttribute("data-tx_half", (blobWidth/blobHeight/2) );
+          el.setAttribute("data-ty", 1);
+          el.setAttribute("data-ty_half", 0.5);
+        } else {
+          el.setAttribute("data-ty", 1);
+          el.setAttribute("data-ty_half", 0.5);
+          el.setAttribute("data-tx", 1);
+          el.setAttribute("data-tx_half", 0.5);
+        }
+        let imgurl = await(URL.createObjectURL(blob));
+        console.log(imgurl);
+        el.setAttribute("data-richtext", imgurl);
+        let ratio = Number(blobWidth) / Number(blobHeight);
+        el.setAttribute("data-richtext-ratio", ratio);
+
+        // Cleaning the DOM
+        body.removeChild(container);
       } else {
         el.setAttribute("data-tx", "0" );
         el.setAttribute("data-tx_half", "0" );

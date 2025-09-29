@@ -467,6 +467,14 @@ function handleNewPoi(position){
   sendPoi();
 }
 
+function handleMovePoi(position){
+  console.log("move");
+  selectedPoi.value.x = position.x;
+  selectedPoi.value.y = position.y;
+  action.value = null;
+  sendPoi();
+}
+
 async function handleMessage(event){
   if (
   event.origin !== window.location.origin
@@ -482,14 +490,19 @@ async function handleMessage(event){
       break;
     case 'click-sky':
       // Open a new POI panel only if we are on the spot 
-      if (rightPanel.value == "spot"){
-        if (action.value == "newPoi"){
-          handleNewPoi(event.data.value);
-        } else {
-          sendPois();
-        }
-      } else {
+      if (rightPanel.value == "spot" && action.value == "newPoi"){
+        handleNewPoi(event.data.value);
+        break;
+      } else if(rightPanel.value == "spot"){
+        sendPois();
+        break;
+      }
+      if (rightPanel.value == "poi" && action.value == "movePoi"){
+        handleMovePoi(event.data.value);
+        break;
+      } else if(rightPanel.value == "poi"){
         sendPoi();
+        break;
       }
       break;
     case 'ack':
@@ -688,7 +701,7 @@ onUnmounted(() => {
           <div class="modal-body">
             <div>
               <h3>Image <span>optional</span></h3> 
-              <ImageInput :thumbnail="selectedPoi.image_filename ? '/data/image/' + selectedPoi.image_filename : '/img/img_placeholder3.svg'" :maxSize="config.imgMaxSize" :width="config.imgMaxWidth" :height="config.imgMaxWidth" ref="poiInputRef" @change="handleChangePoiImage(true)">
+              <ImageInput :thumbnail="selectedPoi.image_filename ? '/data/image/' + selectedPoi.image_filename : '/img/img_placeholder3.svg'" :maxSize="config.poiImgMaxSize" :width="config.poiImgMaxWidth" :height="config.poiImgMaxWidth" ref="poiInputRef" @change="handleChangePoiImage(true)">
                 <template #button >
                   <div class="remove">
                     <a href='#' v-show="selectedPoi.image_filename || poiInputRef && poiInputRef.width" @click="handleDeletePoiImage">
@@ -721,6 +734,16 @@ onUnmounted(() => {
                   </li>
                 </ul>
               </div>
+            </div>
+            <!-- TODO JESS: Adjust this div to your taste -->
+            <div class="hotspots">
+              <div :class="{'addHot': true, 'disabled': action == 'newPoi'}" @click="action = 'newPoi'">
+                <span></span>
+                <img src="/src/assets/img/icon_hotspotAdd2.svg" alt="icon hotspot">
+              </div>
+              <p v-show="action != 'movePoi'" @click="action = 'movePoi'">Displace the <span>point of interest</span></p>
+              <p v-show="action == 'movePoi'" class="click"><span>Click on the 360° view</span> to <br> place the point of interest</p>
+              <button v-show="action == 'movePoi'" type="button" class="btn btn-secondary" @click.prevent="action = null">Cancel</button>
             </div>
             <div>
               <h3>Title <span>optional</span></h3>

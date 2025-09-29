@@ -34,7 +34,8 @@ AFRAME.registerComponent("world", {
         el.setAttribute("opacity", 0);
         el.setAttribute("data-x", i);
         el.setAttribute("data-y", j);
-        //~ el.setAttribute("animation__fadein", "property: components.material.material.opacity; from: 0; to: 1; dur: 500; startEvents: fadein");
+        el.setAttribute("animation__fadeout", "property: opacity; to: 0; dur: 300; startEvents: fadeOut");
+        el.setAttribute("animation__fadein", "property: opacity; to: 1; dur: 500; startEvents: fadeIn");
         this.el.appendChild(el);
         this.chunk[i].push(el);
       }
@@ -88,7 +89,7 @@ AFRAME.registerComponent("world", {
           console.log(ev.currentTarget.parentElement.dataset.src);
           return;
         }
-        ev.currentTarget.setAttribute("material", "opacity: 1");
+        ev.currentTarget.emit("fadeIn");
       }
 
       function loadChunk(chunkList, el, counter){
@@ -135,7 +136,7 @@ AFRAME.registerComponent("world", {
       let j=0;
       x.forEach( function(el){
         el.emit("removeListener");
-        el.setAttribute("material", "opacity: 0");
+        el.emit("fadeOut");
         j++;
       });
       i++;

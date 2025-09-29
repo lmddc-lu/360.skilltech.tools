@@ -912,6 +912,7 @@ onUnmounted(() => {
       </div>
       <div class="thumbnail_list">
         <template v-if="spots.length > 0">
+          <div></div>
           <template v-for="spot, index in rSpots">
             <div :class="{'startingPoint': tour.start_id == spot.id, 'panorama': true, 'hover': spotHover == spot.id}"
               v-show="filteredSpots.includes(spot.title)" :id="'panorama_' + spot.id">
@@ -969,6 +970,7 @@ onUnmounted(() => {
               </p>
               </router-link>
             </div>
+            <div></div>
           </template>
         </template>
         <div class="panorama placeholder" v-show="spots.length == 0">

@@ -1,6 +1,6 @@
 /*
- * Center the children of an a-entity vertically
- * May be used for text entities
+ * A sky sphere composed of 32 tiles
+ * that will load one after the other
  */
 
 AFRAME.registerComponent("world", {
@@ -54,9 +54,7 @@ AFRAME.registerComponent("world", {
     const counter = this.el.dataset.counter;
     const src = this.data.src;
     //const textureLoaded = this.textureLoaded;
-    let loader = new THREE.FileLoader();
-    loader.setResponseType("blob");
-    loader.setMimeType("image/jpeg");
+    let loader = new THREE.ImageLoader();
 
     if(src && oldData.src != src) {
       el.setAttribute("data-src", src);
@@ -97,8 +95,8 @@ AFRAME.registerComponent("world", {
         if (!currentChunk) return;
         let i = currentChunk.x;
         let j = currentChunk.y;
-
-        let texture = loader.load("/data/image/" + i + "/" + j + "/" + src, function(file){
+        let baseUrl = window.location.href.substring(0, (window.location.href.lastIndexOf('/'))-2) + "/data/image/";
+        let texture = loader.load(baseUrl + i + "/" + j + "/" + src, function(file){
           /*
            * Maybe the user clicked another target before the hi-res sky is loaded. In such case
            * we didn't modify the sky texture
@@ -109,8 +107,6 @@ AFRAME.registerComponent("world", {
           };
           // Download the next chunk
           loadChunk(chunkList, el, counter);
-
-          let url = window.location.protocol + "//" + window.location.hostname + ":" +  window.location.port + "/data/image/" + i + "/" + j + "/" + src;
           chunk[i][j].addEventListener(
             'materialtextureloaded',
             textureLoaded,
@@ -121,8 +117,7 @@ AFRAME.registerComponent("world", {
             removeListener,
             {once: true}
           );
-          
-          chunk[i][j].setAttribute("src", url);
+          chunk[i][j].setAttribute("src", file.src);
         });
       }
       loadChunk(chunkList, el, counter);

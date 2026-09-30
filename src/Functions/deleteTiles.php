@@ -4,8 +4,8 @@ function deleteTiles($filename){
   
   $path =  __DIR__ . "/../../html/data/image/";
   // Set the number of tiles in x and y direction
-  $xMax = 7;
-  $yMax = 3;
+  $xMax = 15;
+  $yMax = 7;
   // Search and delete all tiles
   if ($filename){
     for ($y = 0; $y <= $yMax; $y++){

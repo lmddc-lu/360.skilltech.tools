@@ -24,6 +24,11 @@ class UserRepository
     return null;
   }
 
+  public function delete($id):bool {
+    $statement = $this->pdo->prepare("DELETE FROM `user` WHERE id=?");
+    return $statement->execute([$id]);
+  }
+
   public function findByEmail($email) {
     $statement = $this->pdo->prepare("SELECT * FROM user WHERE email=?");
     $statement->execute([$email]);
@@ -77,4 +82,3 @@ class UserRepository
     return false;
   }
 }
- 

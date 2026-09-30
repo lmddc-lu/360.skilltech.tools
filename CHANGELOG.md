@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0] - 2026-09-30
+
+### Fixed
+
+  - All tiles were not deleted when deleting a 360 image
+  - Bugs affecting the self-hosting of an exported tour
+  - Update dependencies with npm
+
+### Added
+
+  - Admin tool to delete a user and all their data (CLI): src/admin/deleteUser.php
+  - Admin tool to delete images tiles that should have been deleted: src/admin/fixDeleteTiles.php
+
 ## [1.3.0] - 2025-09-25
 
 ### Fixed

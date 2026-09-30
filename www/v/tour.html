@@ -45,13 +45,15 @@
         border-radius: 15px;
         position: absolute;
         bottom: 20px;
-        left: -50%;
+        left: 0;
+        transform: translate(-100%, 0);
         background-color: white;
         width: 490px;
-        transition: left 0.5s;
+        transition: left 0.5s, transform 0.5s;
       }
       .about.show {
         left: 20px;
+        transform: translate(0, 0);
       }
       .content{
         padding: 20px 20px 20px 20px;

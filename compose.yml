@@ -1,6 +1,6 @@
 services:
     nginx-dev:
-        image: nginx
+        image: nginx:1.31.3-alpine
         profiles: ["dev"]
         volumes:
          - ./www/data:/usr/share/nginx/html/data
@@ -19,7 +19,7 @@ services:
          - app-network
 
     nginx-prod:
-        image: nginx
+        image: nginx:1.31.3-alpine
         profiles: ["prod"]
         volumes:
          - ./www/data:/usr/share/nginx/html/data
@@ -89,22 +89,22 @@ services:
 
 
     mariadb:
-        image: mariadb:latest
+        image: mariadb:12.2.2
         profiles: ["dev", "prod"]
-        restart: always
+        restart: unless-stopped
         volumes:
          - ./db:/var/lib/mysql
          - ./sql_dump:/sql_dump
         environment:
-            MARIADB_ROOT_PASSWORD: rootpassword
+            MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-rootpassword}
             MARIADB_USER: lmddc
-            MARIADB_PASSWORD: password
+            MARIADB_PASSWORD: ${MARIADB_PASSWORD:-password}
             MARIADB_DATABASE: tour
         networks:
          - app-network
 
     vue-dev:
-        image: node:21-bookworm
+        image: node:22-bookworm
         profiles: ["dev"]
         volumes:
             - ./vue-app:/usr/src/app
@@ -120,8 +120,8 @@ services:
          - app-network
 
     vue-build:
-        image: node:21-bookworm
-        profiles: ["build", "prod"]
+        image: node:22-bookworm
+        profiles: ["build"]
         volumes:
             - ./vue-app:/usr/src/app
         working_dir: /usr/src/app
